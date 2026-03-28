@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-ui component compilation tests
+ * @chasket/chasket-ui component compilation tests
  *
  * Verifies all UI components compile successfully and produce
  * correct Web Component output with expected features.

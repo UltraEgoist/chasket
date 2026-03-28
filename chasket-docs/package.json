@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/chasket-docs",
+  "name": "@chasket/chasket-docs",
   "version": "0.2.0",
   "private": true,
   "description": "Chasket documentation site — built with Chasket SSR",

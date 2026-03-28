@@ -1,4 +1,4 @@
-# @aspect/chasket-router
+# @chasket/chasket-router
 
 Client-side SPA router for Chasket applications. History API based routing with dynamic parameters, nested routes, guards, and Web Component integration.
 
@@ -7,13 +7,13 @@ Zero dependencies.
 ## Installation
 
 ```bash
-npm install @aspect/chasket-router
+npm install @chasket/chasket-router
 ```
 
 ## Quick Start
 
 ```javascript
-import { createRouter } from '@aspect/chasket-router';
+import { createRouter } from '@chasket/chasket-router';
 
 const router = createRouter({
   routes: [
@@ -77,7 +77,7 @@ interface RouteConfig {
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

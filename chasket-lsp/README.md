@@ -1,4 +1,4 @@
-# @aspect/chasket-lsp
+# @chasket/chasket-lsp
 
 Language Server Protocol implementation for Chasket. Provides diagnostics, completions, hover, go-to-definition, and formatting for `.csk` files in any LSP-compatible editor.
 
@@ -7,7 +7,7 @@ Zero dependencies.
 ## Installation
 
 ```bash
-npm install @aspect/chasket-lsp
+npm install @chasket/chasket-lsp
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ npx chasket-lsp --stdio
 ### From Node.js
 
 ```javascript
-const { createServer } = require('@aspect/chasket-lsp');
+const { createServer } = require('@chasket/chasket-lsp');
 const server = createServer(process.stdin, process.stdout);
 server.start();
 ```
@@ -75,7 +75,7 @@ lspconfig.csk.setup {}
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

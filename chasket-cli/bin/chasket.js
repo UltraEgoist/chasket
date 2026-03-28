@@ -275,7 +275,7 @@ function cmdInit() {
 
   // package.json - npm パッケージメタデータと NPM scripts
   // npx 経由で chasket を実行することで、グローバルインストール不要にする
-  // devDependencies に @aspect/chasket を追加し、npm install 後は npx なしでも動作
+  // devDependencies に @chasket/chasket を追加し、npm install 後は npx なしでも動作
   fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     name: name,
     version: '0.0.1',
@@ -286,7 +286,7 @@ function cmdInit() {
       check: 'npx chasket check',
     },
     devDependencies: {
-      '@aspect/chasket': '^0.2.0',
+      '@chasket/chasket': '^0.2.0',
     },
   }, null, 2) + '\n');
   console.log(`    ${c.ok('✓')} package.json`);

@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-npm install @aspect/chasket
+npm install @chasket/chasket
 ```
 
 ## compile(source, fileName, options?)
@@ -13,7 +13,7 @@ npm install @aspect/chasket
 メインのコンパイル関数。`.csk` ソースを受け取り、Web Component の JavaScript コードを出力します。
 
 ```javascript
-const { compile } = require('@aspect/chasket');
+const { compile } = require('@chasket/chasket');
 
 const result = compile(source, 'my-component.csk', {
   target: 'js',

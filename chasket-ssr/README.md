@@ -1,4 +1,4 @@
-# @aspect/chasket-ssr
+# @chasket/chasket-ssr
 
 Server-side rendering for Chasket components. Render `.csk` files to HTML strings on the server with hydration support for client-side activation.
 
@@ -7,13 +7,13 @@ Zero dependencies.
 ## Installation
 
 ```bash
-npm install @aspect/chasket-ssr
+npm install @chasket/chasket-ssr
 ```
 
 ## Quick Start
 
 ```javascript
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 const fs = require('fs');
 
 const source = fs.readFileSync('src/my-counter.csk', 'utf8');
@@ -62,7 +62,7 @@ Streaming alternative to `renderToString`. Returns a `Readable` stream for large
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

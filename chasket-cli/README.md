@@ -1,4 +1,4 @@
-# @aspect/chasket
+# @chasket/chasket
 
 Template-first compiler that transforms `.csk` files into native Web Components.
 
@@ -7,7 +7,7 @@ Zero runtime, zero dependencies. Outputs standard `HTMLElement` classes with Sha
 ## Installation
 
 ```bash
-npm install @aspect/chasket
+npm install @chasket/chasket
 ```
 
 ## CLI Usage
@@ -29,7 +29,7 @@ npx chasket dev
 ## Compiler API
 
 ```javascript
-const { compile } = require('@aspect/chasket');
+const { compile } = require('@chasket/chasket');
 
 const result = compile(source, 'my-component.csk', {
   target: 'js',
@@ -92,12 +92,12 @@ interface CompileResult {
 
 | Package | Description |
 |---------|-------------|
-| [@aspect/chasket-ssr](https://www.npmjs.com/package/@aspect/chasket-ssr) | Server-side rendering |
-| [@aspect/chasket-router](https://www.npmjs.com/package/@aspect/chasket-router) | Client-side SPA router |
-| [@aspect/chasket-store](https://www.npmjs.com/package/@aspect/chasket-store) | Reactive state management |
-| [@aspect/chasket-ui](https://www.npmjs.com/package/@aspect/chasket-ui) | Pre-built UI components |
-| [@aspect/chasket-lsp](https://www.npmjs.com/package/@aspect/chasket-lsp) | Language Server Protocol |
-| [@aspect/vite-plugin-chasket](https://www.npmjs.com/package/@aspect/vite-plugin-chasket) | Vite integration with HMR |
+| [@chasket/chasket-ssr](https://www.npmjs.com/package/@chasket/chasket-ssr) | Server-side rendering |
+| [@chasket/chasket-router](https://www.npmjs.com/package/@chasket/chasket-router) | Client-side SPA router |
+| [@chasket/chasket-store](https://www.npmjs.com/package/@chasket/chasket-store) | Reactive state management |
+| [@chasket/chasket-ui](https://www.npmjs.com/package/@chasket/chasket-ui) | Pre-built UI components |
+| [@chasket/chasket-lsp](https://www.npmjs.com/package/@chasket/chasket-lsp) | Language Server Protocol |
+| [@chasket/vite-plugin-chasket](https://www.npmjs.com/package/@chasket/vite-plugin-chasket) | Vite integration with HMR |
 
 ## License
 

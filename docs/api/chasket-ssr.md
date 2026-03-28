@@ -1,17 +1,17 @@
-# @aspect/chasket-ssr API Reference
+# @chasket/chasket-ssr API Reference
 
 Chasket コンポーネントをサーバーサイドで HTML にレンダリングするためのパッケージ。SEO 対応、初期表示の高速化、ハイドレーションによるクライアント側の活性化をサポートします。
 
 ## Installation
 
 ```bash
-npm install @aspect/chasket-ssr
+npm install @chasket/chasket-ssr
 ```
 
 ## Quick Start
 
 ```javascript
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 const fs = require('fs');
 
 // .csk ソースを読み込み
@@ -138,7 +138,7 @@ const html = renderToString(source, {
 ### Example
 
 ```javascript
-const { renderToString, renderPage, getHydrationRuntime } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage, getHydrationRuntime } = require('@chasket/chasket-ssr');
 
 const source = fs.readFileSync('src/app.csk', 'utf8');
 const body = renderToString(source, { hydrate: true });
@@ -222,7 +222,7 @@ SSR は以下のセキュリティ機能を内蔵しています:
 ```javascript
 const express = require('express');
 const fs = require('fs');
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 
 const app = express();
 const source = fs.readFileSync('src/app.csk', 'utf8');
@@ -248,7 +248,7 @@ app.listen(3000);
 ```javascript
 const fastify = require('fastify')();
 const fs = require('fs');
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 
 const source = fs.readFileSync('src/app.csk', 'utf8');
 
@@ -273,7 +273,7 @@ fastify.listen({ port: 3000 });
 TypeScript 型定義が `index.d.ts` に含まれています。
 
 ```typescript
-import { renderToString, renderPage, getHydrationRuntime } from '@aspect/chasket-ssr';
+import { renderToString, renderPage, getHydrationRuntime } from '@chasket/chasket-ssr';
 
 const html: string = renderToString(source, {
   props: { name: 'World' },

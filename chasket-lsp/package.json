@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/chasket-lsp",
+  "name": "@chasket/chasket-lsp",
   "version": "0.2.0",
   "description": "Language Server Protocol implementation for Chasket",
   "main": "server.js",

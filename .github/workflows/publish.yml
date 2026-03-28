@@ -20,37 +20,37 @@ jobs:
       - name: Run all tests
         run: npm test
 
-      - name: Publish @aspect/chasket (CLI + compiler)
+      - name: Publish @chasket/chasket (CLI + compiler)
         run: cd chasket-cli && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/chasket-ssr
+      - name: Publish @chasket/chasket-ssr
         run: cd chasket-ssr && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/chasket-lsp
+      - name: Publish @chasket/chasket-lsp
         run: cd chasket-lsp && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/chasket-router
+      - name: Publish @chasket/chasket-router
         run: cd chasket-router && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/chasket-store
+      - name: Publish @chasket/chasket-store
         run: cd chasket-store && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/chasket-ui
+      - name: Publish @chasket/chasket-ui
         run: cd chasket-ui && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @aspect/vite-plugin-chasket
+      - name: Publish @chasket/vite-plugin-chasket
         run: cd vite-plugin-chasket && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
