@@ -1,7 +1,7 @@
 /**
- * @aspect/chasket-store — ESM entry
+ * @chasket/chasket-store — ESM entry
  * Reactive global state management for Chasket applications.
- * @module @aspect/chasket-store
+ * @module @chasket/chasket-store
  */
 
 import { createRequire } from 'module';

@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-store — Type definitions
+ * @chasket/chasket-store — Type definitions
  */
 
 export interface StoreDefinition<S extends object = Record<string, unknown>> {

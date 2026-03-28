@@ -1,4 +1,4 @@
-# @aspect/chasket-ui
+# @chasket/chasket-ui
 
 Pre-built UI component library for Chasket. All components are native Web Components with Shadow DOM style encapsulation.
 
@@ -7,15 +7,15 @@ Zero dependencies.
 ## Installation
 
 ```bash
-npm install @aspect/chasket-ui
+npm install @chasket/chasket-ui
 ```
 
 ```html
 <!-- All components -->
-<script src="node_modules/@aspect/chasket-ui/dist/chasket-ui.js"></script>
+<script src="node_modules/@chasket/chasket-ui/dist/chasket-ui.js"></script>
 
 <!-- Individual component -->
-<script src="node_modules/@aspect/chasket-ui/dist/fl-button.js"></script>
+<script src="node_modules/@chasket/chasket-ui/dist/fl-button.js"></script>
 ```
 
 ## Components
@@ -86,7 +86,7 @@ node build.js
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

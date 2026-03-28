@@ -1,4 +1,4 @@
-# @aspect/chasket-store
+# @chasket/chasket-store
 
 Reactive state management for Chasket applications. Flux-based architecture with typed actions, selectors, middleware, and time-travel debugging.
 
@@ -7,13 +7,13 @@ Zero dependencies.
 ## Installation
 
 ```bash
-npm install @aspect/chasket-store
+npm install @chasket/chasket-store
 ```
 
 ## Quick Start
 
 ```javascript
-import { createStore } from '@aspect/chasket-store';
+import { createStore } from '@chasket/chasket-store';
 
 const useCounter = createStore({
   name: 'counter',
@@ -70,7 +70,7 @@ const logger = (store) => (next) => (action, payload) => {
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

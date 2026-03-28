@@ -65,7 +65,7 @@ chasket dev --no-hmr
 `.csk` ソースコードをコンパイルします。
 
 ```javascript
-const { compile } = require('@aspect/chasket-cli');
+const { compile } = require('@chasket/chasket-cli');
 
 const result = compile(chasketSource, {
   target: 'js',       // 'js' | 'ts'
@@ -92,7 +92,7 @@ const result = compile(chasketSource, {
 `.csk` ソースを4ブロックに分割します。
 
 ```javascript
-const { splitBlocks } = require('@aspect/chasket-cli');
+const { splitBlocks } = require('@chasket/chasket-cli');
 
 const blocks = splitBlocks(chasketSource);
 // [{ type: 'meta', content: '...', startLine: 1 }, ...]
@@ -103,7 +103,7 @@ const blocks = splitBlocks(chasketSource);
 テンプレート文字列をAST（抽象構文木）にパースします。
 
 ```javascript
-const { parseTemplateNodes } = require('@aspect/chasket-cli');
+const { parseTemplateNodes } = require('@chasket/chasket-cli');
 
 const nodes = parseTemplateNodes('<div>{{ name }}</div>');
 ```
@@ -117,7 +117,7 @@ const nodes = parseTemplateNodes('<div>{{ name }}</div>');
 `.csk` ソースからHTML文字列を生成します。
 
 ```javascript
-const { renderToString } = require('@aspect/chasket-ssr');
+const { renderToString } = require('@chasket/chasket-ssr');
 
 const html = renderToString(chasketSource, {
   props: { title: 'Hello' },
@@ -141,7 +141,7 @@ const html = renderToString(chasketSource, {
 HTML をチャンク単位でストリーミング出力します。TTFB の改善に有効です。
 
 ```javascript
-const { renderToStream } = require('@aspect/chasket-ssr');
+const { renderToStream } = require('@chasket/chasket-ssr');
 
 const stream = renderToStream(chasketSource, {
   props: { title: 'Hello' },
@@ -157,7 +157,7 @@ stream.pipe(res);
 完全なHTMLページを生成します。
 
 ```javascript
-const { renderPage } = require('@aspect/chasket-ssr');
+const { renderPage } = require('@chasket/chasket-ssr');
 
 const html = renderPage({
   title: 'My App',
@@ -174,7 +174,7 @@ const html = renderPage({
 完全なHTMLページをストリーミング出力します。`body` にReadableストリームを渡せます。
 
 ```javascript
-const { renderPageToStream } = require('@aspect/chasket-ssr');
+const { renderPageToStream } = require('@chasket/chasket-ssr');
 
 const stream = renderPageToStream({
   title: 'My App',
@@ -189,7 +189,7 @@ stream.pipe(res);
 クライアント側ハイドレーション用の JavaScript コードを返します。
 
 ```javascript
-const { getHydrationRuntime } = require('@aspect/chasket-ssr');
+const { getHydrationRuntime } = require('@chasket/chasket-ssr');
 
 const script = getHydrationRuntime();
 // <script> タグ内に挿入して使用
@@ -198,7 +198,7 @@ const script = getHydrationRuntime();
 ### エスケープ関数
 
 ```javascript
-const { escapeHtml, escapeAttr, escapeUrl } = require('@aspect/chasket-ssr');
+const { escapeHtml, escapeAttr, escapeUrl } = require('@chasket/chasket-ssr');
 
 escapeHtml('<script>alert(1)</script>')  // &lt;script&gt;...
 escapeAttr('"><img src=x>')             // &quot;&gt;&lt;img...

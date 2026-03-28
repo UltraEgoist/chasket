@@ -5,7 +5,7 @@ Vite で `.csk` ファイルをコンパイルするためのプラグイン。H
 ## Installation
 
 ```bash
-npm install -D vite-plugin-chasket @aspect/chasket
+npm install -D vite-plugin-chasket @chasket/chasket
 ```
 
 ## Setup
@@ -72,7 +72,7 @@ import './child-component.csk';
 
 プラグインは以下の順序でコンパイラを検索します:
 
-1. `@aspect/chasket` パッケージ（npm インストール済みの場合）
+1. `@chasket/chasket` パッケージ（npm インストール済みの場合）
 2. `../chasket-cli/lib/compiler`（モノレポ開発時の相対パス）
 
 見つからない場合はエラーをスローします。
@@ -87,8 +87,8 @@ export default {
   plugins: [chasket()],
   resolve: {
     alias: {
-      '@aspect/chasket-router': '/path/to/chasket-router/index.mjs',
-      '@aspect/chasket-store': '/path/to/chasket-store/index.js',
+      '@chasket/chasket-router': '/path/to/chasket-router/index.mjs',
+      '@chasket/chasket-store': '/path/to/chasket-store/index.js',
     }
   }
 };

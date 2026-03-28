@@ -5,7 +5,7 @@
 ## 基本的な使い方
 
 ```javascript
-const { createRouter } = require('@aspect/chasket-router');
+const { createRouter } = require('@chasket/chasket-router');
 
 const router = createRouter({
   mode: 'history',   // 'history' | 'hash'

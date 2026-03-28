@@ -1,17 +1,17 @@
-# @aspect/chasket-router API Reference
+# @chasket/chasket-router API Reference
 
 Client-side SPA router for Chasket applications. History API ベースのルーティングを提供します。
 
 ## Installation
 
 ```bash
-npm install @aspect/chasket-router
+npm install @chasket/chasket-router
 ```
 
 ## Quick Start
 
 ```javascript
-import { createRouter } from '@aspect/chasket-router';
+import { createRouter } from '@chasket/chasket-router';
 
 const router = createRouter({
   routes: [

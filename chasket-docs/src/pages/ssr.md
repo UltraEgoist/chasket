@@ -5,7 +5,7 @@ Chasket SSR は `.csk` ソースコードからサーバー上で HTML を生成
 ## 基本的な使い方
 
 ```javascript
-const { renderToString } = require('@aspect/chasket-ssr');
+const { renderToString } = require('@chasket/chasket-ssr');
 const fs = require('fs');
 
 const source = fs.readFileSync('src/components/my-card.csk', 'utf-8');
@@ -23,7 +23,7 @@ console.log(html);
 
 ```javascript
 const express = require('express');
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 const fs = require('fs');
 
 const app = express();
@@ -51,7 +51,7 @@ app.listen(3000);
 チャンク単位でHTMLを送信し、TTFB（Time To First Byte）を改善します。
 
 ```javascript
-const { renderToStream, renderPageToStream } = require('@aspect/chasket-ssr');
+const { renderToStream, renderPageToStream } = require('@chasket/chasket-ssr');
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html');

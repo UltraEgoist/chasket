@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-ui — Type definitions
+ * @chasket/chasket-ui — Type definitions
  *
  * Pre-built Web Components for Chasket applications.
  * All components use Shadow DOM and are registered as Custom Elements.

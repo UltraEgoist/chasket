@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Build script for @aspect/chasket-ui
+ * Build script for @chasket/chasket-ui
  *
  * Compiles all .csk components in components/ to individual JS files
  * and a combined bundle (dist/chasket-ui.js).
@@ -57,7 +57,7 @@ function build() {
   }
 
   // Write combined bundle
-  const banner = `/**\n * @aspect/chasket-ui v0.1.0\n * Components: ${componentNames.join(', ')}\n * Generated: ${new Date().toISOString()}\n */\n\n`;
+  const banner = `/**\n * @chasket/chasket-ui v0.1.0\n * Components: ${componentNames.join(', ')}\n * Generated: ${new Date().toISOString()}\n */\n\n`;
   const bundle = banner + bundleParts.join('\n\n');
   fs.writeFileSync(path.join(DIST_DIR, 'chasket-ui.js'), bundle, 'utf-8');
 

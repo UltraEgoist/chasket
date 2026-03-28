@@ -5,7 +5,7 @@ Chasket は `.csk` 単一ファイルコンポーネントからネイティブ 
 ## インストール
 
 ```bash
-npm install -g @aspect/chasket-cli
+npm install -g @chasket/chasket-cli
 ```
 
 ## プロジェクト作成

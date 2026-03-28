@@ -1,6 +1,6 @@
 /**
  * Chasket Language Server Protocol implementation
- * @module @aspect/chasket-lsp
+ * @module @chasket/chasket-lsp
  */
 
 import { Readable, Writable } from 'stream';

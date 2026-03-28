@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/chasket-ui",
+  "name": "@chasket/chasket-ui",
   "version": "0.2.0",
   "description": "Official UI component library for Chasket — pre-built, accessible Web Components",
   "main": "dist/chasket-ui.js",
@@ -37,7 +37,7 @@
     "url": "https://github.com/UltraEgoist/chasket/issues"
   },
   "peerDependencies": {
-    "@aspect/chasket": ">=0.1.0"
+    "@chasket/chasket": ">=0.1.0"
   },
   "scripts": {
     "build": "node build.js",
