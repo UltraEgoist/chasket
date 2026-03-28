@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-router — CJS entry
+ * @chasket/chasket-router — CJS entry
  * Client-side router for Chasket SPA applications.
  */
 

@@ -5,7 +5,7 @@
 ## 基本的な使い方
 
 ```javascript
-const { createStore } = require('@aspect/chasket-store');
+const { createStore } = require('@chasket/chasket-store');
 
 const useCounter = createStore({
   state: { count: 0, name: 'Counter' },
@@ -126,7 +126,7 @@ store.redo();  // { text: 'World' }
 ### Logger
 
 ```javascript
-const { loggerMiddleware } = require('@aspect/chasket-store');
+const { loggerMiddleware } = require('@chasket/chasket-store');
 
 const useStore = createStore({
   state: { count: 0 },
@@ -138,7 +138,7 @@ const useStore = createStore({
 ### Freeze（不変性強制）
 
 ```javascript
-const { freezeMiddleware } = require('@aspect/chasket-store');
+const { freezeMiddleware } = require('@chasket/chasket-store');
 
 const useStore = createStore({
   state: { count: 0 },
@@ -152,7 +152,7 @@ const useStore = createStore({
 ### Persist（永続化）
 
 ```javascript
-const { persistMiddleware } = require('@aspect/chasket-store');
+const { persistMiddleware } = require('@chasket/chasket-store');
 
 const useStore = createStore({
   state: { theme: 'light' },
@@ -179,7 +179,7 @@ function myMiddleware(store) {
 複数のストアを統合します。
 
 ```javascript
-const { combineStores } = require('@aspect/chasket-store');
+const { combineStores } = require('@chasket/chasket-store');
 
 const useAuth = createStore({ ... });
 const useCart = createStore({ ... });

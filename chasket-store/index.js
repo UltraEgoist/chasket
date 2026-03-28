@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-store — Reactive global state management for Chasket applications
+ * @chasket/chasket-store — Reactive global state management for Chasket applications
  *
  * Provides a lightweight, reactive store that integrates with Chasket's
  * `consume` / `provide` pattern and Web Component lifecycle.
@@ -30,7 +30,7 @@
  *   counter.subscribe(state => console.log(state.count));
  *   counter.dispatch('increment');
  *
- * @module @aspect/chasket-store
+ * @module @chasket/chasket-store
  */
 
 'use strict';

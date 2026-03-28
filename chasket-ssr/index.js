@@ -1,19 +1,19 @@
 /**
- * @aspect/chasket-ssr — Server-Side Rendering for Chasket Web Components
+ * @chasket/chasket-ssr — Server-Side Rendering for Chasket Web Components
  *
  * Compiles .csk source files to static HTML strings on the server,
  * with optional hydration markers for client-side activation.
  *
  * Usage:
- *   const { renderToString } = require('@aspect/chasket-ssr');
- *   const { compile } = require('@aspect/chasket-cli');
+ *   const { renderToString } = require('@chasket/chasket-ssr');
+ *   const { compile } = require('@chasket/chasket-cli');
  *
  *   const html = renderToString(chasketSource, {
  *     props: { title: 'Hello' },
  *     state: { count: 5 },
  *   });
  *
- * @module @aspect/chasket-ssr
+ * @module @chasket/chasket-ssr
  */
 
 'use strict';

@@ -3453,7 +3453,7 @@ function compile(source, fileName, options) {
  * @returns {{ html: string, css: string, tagName: string, success: boolean, diagnostics: Array }}
  *
  * @example
- * const { renderToString } = require('@aspect/chasket');
+ * const { renderToString } = require('@chasket/chasket');
  * const { html } = renderToString(fs.readFileSync('Card.csk', 'utf-8'), 'Card.csk', { title: 'Hello' });
  * // Returns: <x-card><template shadowrootmode="open"><style>...</style><div>Hello</div></template></x-card>
  */

@@ -1,13 +1,13 @@
-# @aspect/vite-plugin-chasket
+# @chasket/vite-plugin-chasket
 
 Vite plugin for compiling `.csk` files with Hot Module Replacement support.
 
-Zero dependencies (peer-depends on `vite` and `@aspect/chasket`).
+Zero dependencies (peer-depends on `vite` and `@chasket/chasket`).
 
 ## Installation
 
 ```bash
-npm install -D vite-plugin-chasket @aspect/chasket
+npm install -D vite-plugin-chasket @chasket/chasket
 ```
 
 ## Setup
@@ -55,7 +55,7 @@ import './components/my-card.csk';
 
 ## Part of the Chasket ecosystem
 
-This package is part of [Chasket](https://www.npmjs.com/package/@aspect/chasket), a template-first Web Component compiler.
+This package is part of [Chasket](https://www.npmjs.com/package/@chasket/chasket), a template-first Web Component compiler.
 
 ## License
 

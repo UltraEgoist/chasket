@@ -801,12 +801,12 @@ const blocks = splitBlocks(source);
 
 ## SSR (Server-Side Rendering)
 
-`@aspect/chasket-ssr` パッケージで、Chasket コンポーネントをサーバーサイドで HTML にレンダリングできます。
+`@chasket/chasket-ssr` パッケージで、Chasket コンポーネントをサーバーサイドで HTML にレンダリングできます。
 
 ### renderToString(source, options?)
 
 ```javascript
-const { renderToString } = require('@aspect/chasket-ssr');
+const { renderToString } = require('@chasket/chasket-ssr');
 
 // 基本
 const html = renderToString(source);
@@ -826,7 +826,7 @@ const html = renderToString(source, { hydrate: true });
 完全な HTML ドキュメントを生成:
 
 ```javascript
-const { renderPage } = require('@aspect/chasket-ssr');
+const { renderPage } = require('@chasket/chasket-ssr');
 
 const page = renderPage({
   title: 'My App',
@@ -847,7 +847,7 @@ const page = renderPage({
 
 ## LSP (Language Server Protocol)
 
-`@aspect/chasket-lsp` パッケージで、任意の LSP 対応エディタから Chasket の言語機能を利用できます。
+`@chasket/chasket-lsp` パッケージで、任意の LSP 対応エディタから Chasket の言語機能を利用できます。
 
 ### 起動
 
@@ -873,7 +873,7 @@ npx chasket-lsp --stdio
 ### Node.js API
 
 ```javascript
-const { ChasketLanguageService } = require('@aspect/chasket-lsp');
+const { ChasketLanguageService } = require('@chasket/chasket-lsp');
 
 const service = new ChasketLanguageService();
 service.setCompilerPath('/path/to/compiler.js');

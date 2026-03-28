@@ -1,19 +1,19 @@
-# @aspect/chasket-ui API Reference
+# @chasket/chasket-ui API Reference
 
 Chasket で構築されたリユーザブル UI コンポーネントライブラリ。全コンポーネントが Web Components として動作し、Shadow DOM でスタイルをカプセル化しています。
 
 ## Installation
 
 ```bash
-npm install @aspect/chasket-ui
+npm install @chasket/chasket-ui
 ```
 
 ```html
 <!-- バンドル版（全コンポーネント） -->
-<script src="node_modules/@aspect/chasket-ui/dist/chasket-ui.js"></script>
+<script src="node_modules/@chasket/chasket-ui/dist/chasket-ui.js"></script>
 
 <!-- 個別コンポーネント -->
-<script src="node_modules/@aspect/chasket-ui/dist/fl-button.js"></script>
+<script src="node_modules/@chasket/chasket-ui/dist/fl-button.js"></script>
 ```
 
 ---

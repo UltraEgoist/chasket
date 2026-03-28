@@ -25,14 +25,14 @@ Initial public release. Chasket is a template-first Web Component compiler that 
 
 ### Packages
 
-- **CLI** (`@aspect/chasket`): `init` / `build` / `check` / `dev` commands, HMR, `--optimize` minification
-- **SSR** (`@aspect/chasket-ssr`): `renderToString()`, `renderToStream()`, hydration, page streaming
-- **Router** (`@aspect/chasket-router`): hash/history mode, dynamic params, navigation guards
-- **Store** (`@aspect/chasket-store`): Flux/actions/getters, undo/redo, middleware
-- **UI** (`@aspect/chasket-ui`): 9 accessible components with theme customization
-- **LSP** (`@aspect/chasket-lsp`): 12 features, zero-dependency, editor-agnostic
+- **CLI** (`@chasket/chasket`): `init` / `build` / `check` / `dev` commands, HMR, `--optimize` minification
+- **SSR** (`@chasket/chasket-ssr`): `renderToString()`, `renderToStream()`, hydration, page streaming
+- **Router** (`@chasket/chasket-router`): hash/history mode, dynamic params, navigation guards
+- **Store** (`@chasket/chasket-store`): Flux/actions/getters, undo/redo, middleware
+- **UI** (`@chasket/chasket-ui`): 9 accessible components with theme customization
+- **LSP** (`@chasket/chasket-lsp`): 12 features, zero-dependency, editor-agnostic
 - **VSCode** (`chasket-vscode`): syntax highlighting, completion, hover, diagnostics, go-to-definition
-- **Vite Plugin** (`@aspect/vite-plugin-chasket`): `.csk` auto-compilation, HMR integration
+- **Vite Plugin** (`@chasket/vite-plugin-chasket`): `.csk` auto-compilation, HMR integration
 
 ### Security
 

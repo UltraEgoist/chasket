@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket — Compiler Type definitions
+ * @chasket/chasket — Compiler Type definitions
  */
 
 export interface CompileOptions {

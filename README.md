@@ -181,7 +181,7 @@ The LSP server provides completion, hover, definition jump, references, rename, 
 ## Server-side rendering
 
 ```javascript
-const { renderToString, renderPage } = require('@aspect/chasket-ssr');
+const { renderToString, renderPage } = require('@chasket/chasket-ssr');
 
 const html = renderToString(source, { hydrate: true });
 const page = renderPage({ title: 'My App', body: html, hydrate: true });
@@ -202,13 +202,13 @@ See [SSR API docs](docs/api/chasket-ssr.md) for Express/Fastify integration exam
 
 | Package | Description |
 |---------|-------------|
-| `@aspect/chasket` | Compiler & CLI |
-| `@aspect/chasket-ssr` | Server-side rendering with hydration support |
-| `@aspect/chasket-lsp` | Language Server Protocol for any editor |
-| `@aspect/chasket-router` | SPA routing with `<chasket-router>`, `<chasket-link>` |
-| `@aspect/chasket-store` | Flux-like state management with undo/redo |
-| `@aspect/chasket-ui` | 9 accessible UI components (`<fl-button>`, `<fl-dialog>`, etc.) |
-| `@aspect/vite-plugin-chasket` | Vite integration with HMR |
+| `@chasket/chasket` | Compiler & CLI |
+| `@chasket/chasket-ssr` | Server-side rendering with hydration support |
+| `@chasket/chasket-lsp` | Language Server Protocol for any editor |
+| `@chasket/chasket-router` | SPA routing with `<chasket-router>`, `<chasket-link>` |
+| `@chasket/chasket-store` | Flux-like state management with undo/redo |
+| `@chasket/chasket-ui` | 9 accessible UI components (`<fl-button>`, `<fl-dialog>`, etc.) |
+| `@chasket/vite-plugin-chasket` | Vite integration with HMR |
 | `chasket-vscode` | VS Code extension (LSP or inline mode) |
 | `chasket-compiler-rust` | Experimental Rust compiler (parser stage) |
 

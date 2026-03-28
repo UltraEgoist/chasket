@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-router — Type definitions
+ * @chasket/chasket-router — Type definitions
  */
 
 export interface RouteConfig {

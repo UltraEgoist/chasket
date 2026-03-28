@@ -31,12 +31,12 @@ If you discover a security vulnerability in Chasket, please report it responsibl
 
 The following are in scope for security reports:
 
-- **Chasket compiler** (`@aspect/chasket`): Code injection via compiled output, XSS bypass in template rendering, path traversal in file operations
+- **Chasket compiler** (`@chasket/chasket`): Code injection via compiled output, XSS bypass in template rendering, path traversal in file operations
 - **Development server** (`chasket dev`): Directory traversal, CORS bypass, WebSocket injection
-- **Router** (`@aspect/chasket-router`): Open redirect, URL injection, path traversal
-- **Store** (`@aspect/chasket-store`): Prototype pollution, state injection
-- **UI components** (`@aspect/chasket-ui`): XSS via props/slots, accessibility bypass
-- **Vite plugin** (`@aspect/vite-plugin-chasket`): Code injection via transform
+- **Router** (`@chasket/chasket-router`): Open redirect, URL injection, path traversal
+- **Store** (`@chasket/chasket-store`): Prototype pollution, state injection
+- **UI components** (`@chasket/chasket-ui`): XSS via props/slots, accessibility bypass
+- **Vite plugin** (`@chasket/vite-plugin-chasket`): Code injection via transform
 
 ### Out of Scope
 

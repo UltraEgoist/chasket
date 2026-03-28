@@ -156,13 +156,13 @@ git merge main
 
 | パッケージ | npm 名 |
 |---|---|
-| chasket-cli | `@aspect/chasket` |
-| chasket-ssr | `@aspect/chasket-ssr` |
-| chasket-router | `@aspect/chasket-router` |
-| chasket-store | `@aspect/chasket-store` |
-| chasket-ui | `@aspect/chasket-ui` |
-| chasket-lsp | `@aspect/chasket-lsp` |
-| vite-plugin-chasket | `@aspect/vite-plugin-chasket` |
+| chasket-cli | `@chasket/chasket` |
+| chasket-ssr | `@chasket/chasket-ssr` |
+| chasket-router | `@chasket/chasket-router` |
+| chasket-store | `@chasket/chasket-store` |
+| chasket-ui | `@chasket/chasket-ui` |
+| chasket-lsp | `@chasket/chasket-lsp` |
+| vite-plugin-chasket | `@chasket/vite-plugin-chasket` |
 
 ### 公開対象外
 

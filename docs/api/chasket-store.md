@@ -1,17 +1,17 @@
-# @aspect/chasket-store API Reference
+# @chasket/chasket-store API Reference
 
 Chasket アプリケーション向けのリアクティブ状態管理ライブラリ。Flux パターンに基づき、型付きアクション、セレクタ、ミドルウェア、タイムトラベルデバッグを提供します。
 
 ## Installation
 
 ```bash
-npm install @aspect/chasket-store
+npm install @chasket/chasket-store
 ```
 
 ## Quick Start
 
 ```javascript
-import { createStore } from '@aspect/chasket-store';
+import { createStore } from '@chasket/chasket-store';
 
 const useCounter = createStore({
   name: 'counter',
@@ -265,7 +265,7 @@ store.reset();
 dispatch されたアクションと状態変更をコンソールにログ出力します。
 
 ```javascript
-import { createStore, loggerMiddleware } from '@aspect/chasket-store';
+import { createStore, loggerMiddleware } from '@chasket/chasket-store';
 
 const useApp = createStore({
   state: { count: 0 },
@@ -293,7 +293,7 @@ const useApp = createStore({
 | `options.deserialize` | `Function` | `JSON.parse` | デシリアライズ関数 |
 
 ```javascript
-import { createStore, persistMiddleware, loadPersistedState } from '@aspect/chasket-store';
+import { createStore, persistMiddleware, loadPersistedState } from '@chasket/chasket-store';
 
 const STORAGE_KEY = 'app-settings';
 
@@ -338,7 +338,7 @@ Object.isFrozen(state); // true
 複数のストアを名前空間付きで統合します。
 
 ```javascript
-import { createStore, combineStores } from '@aspect/chasket-store';
+import { createStore, combineStores } from '@chasket/chasket-store';
 
 const useAuth = createStore({ name: 'auth', state: { user: null }, ... });
 const useCart = createStore({ name: 'cart', state: { items: [] }, ... });

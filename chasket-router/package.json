@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/chasket-router",
+  "name": "@chasket/chasket-router",
   "version": "0.2.0",
   "description": "Client-side router for Chasket SPA applications with hash-based routing, navigation guards, and dynamic parameters",
   "main": "index.js",
@@ -39,7 +39,7 @@
     "url": "https://github.com/UltraEgoist/chasket/issues"
   },
   "peerDependencies": {
-    "@aspect/chasket": ">=0.1.0"
+    "@chasket/chasket": ">=0.1.0"
   },
   "scripts": {
     "test": "node --test test/router.test.js"

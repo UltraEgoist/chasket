@@ -38,15 +38,15 @@ export default function chasketPlugin(options = {}) {
   function getCompiler() {
     if (!compile) {
       try {
-        compile = require('@aspect/chasket').compile;
+        compile = require('@chasket/chasket').compile;
       } catch {
         try {
           compile = require('../chasket-cli/lib/compiler').compile;
         } catch {
           throw new Error(
             'vite-plugin-chasket: Could not find Chasket compiler.\n' +
-            'Install @aspect/chasket as a devDependency:\n' +
-            '  npm install -D @aspect/chasket'
+            'Install @chasket/chasket as a devDependency:\n' +
+            '  npm install -D @chasket/chasket'
           );
         }
       }

@@ -1,5 +1,5 @@
 /**
- * @aspect/chasket-router — Client-side router for Chasket SPA applications
+ * @chasket/chasket-router — Client-side router for Chasket SPA applications
  *
  * Provides History API-based routing with:
  * - Declarative route definition via <chasket-router> and <chasket-route>
@@ -12,7 +12,7 @@
  * - Route metadata and query string parsing
  *
  * Usage:
- *   import { createRouter, ChasketRouter, ChasketRoute, ChasketLink } from '@aspect/chasket-router'
+ *   import { createRouter, ChasketRouter, ChasketRoute, ChasketLink } from '@chasket/chasket-router'
  *
  *   const router = createRouter({
  *     routes: [
@@ -30,7 +30,7 @@
  *     <chasket-route></chasket-route>
  *   </chasket-router>
  *
- * @module @aspect/chasket-router
+ * @module @chasket/chasket-router
  */
 
 // ============================================================

@@ -40,8 +40,8 @@ function chasketPlugin(options = {}) {
   function getCompiler() {
     if (!compile) {
       try {
-        // Try to load from @aspect/chasket package
-        compile = require('@aspect/chasket').compile;
+        // Try to load from @chasket/chasket package
+        compile = require('@chasket/chasket').compile;
       } catch {
         try {
           // Try relative path (monorepo development)
@@ -49,8 +49,8 @@ function chasketPlugin(options = {}) {
         } catch {
           throw new Error(
             'vite-plugin-chasket: Could not find Chasket compiler.\n' +
-            'Install @aspect/chasket as a devDependency:\n' +
-            '  npm install -D @aspect/chasket'
+            'Install @chasket/chasket as a devDependency:\n' +
+            '  npm install -D @chasket/chasket'
           );
         }
       }
