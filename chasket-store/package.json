@@ -1,0 +1,44 @@
+{
+  "name": "@aspect/chasket-store",
+  "version": "0.1.0",
+  "description": "Reactive global state management for Chasket applications with actions, getters, middleware, and undo/redo",
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "chasket",
+    "store",
+    "state-management",
+    "reactive",
+    "web-components",
+    "flux",
+    "undo-redo"
+  ],
+  "author": "Aspect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aspect/chasket.git",
+    "directory": "chasket-store"
+  },
+  "homepage": "https://github.com/aspect/chasket#readme",
+  "bugs": {
+    "url": "https://github.com/aspect/chasket/issues"
+  },
+  "scripts": {
+    "test": "node --test test/store.test.js"
+  }
+}

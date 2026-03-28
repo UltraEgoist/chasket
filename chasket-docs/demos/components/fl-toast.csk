@@ -1,0 +1,81 @@
+<meta>
+  name: "fl-toast"
+  shadow: open
+</meta>
+<script>
+  state visible: boolean = false
+  state text: string = "Notification message here"
+  state isInfo: boolean = true
+  state isSuccess: boolean = false
+  state isError: boolean = false
+
+  computed infoClass: string = isInfo ? "toast toast--info" : "toast"
+  computed successClass: string = isSuccess ? "toast toast--success" : "toast"
+  computed errorClass: string = isError ? "toast toast--error" : "toast"
+
+  fn showInfo() {
+    text = "This is an info notification"
+    isInfo = true
+    isSuccess = false
+    isError = false
+    visible = true
+  }
+
+  fn showSuccess() {
+    text = "Operation completed successfully!"
+    isInfo = false
+    isSuccess = true
+    isError = false
+    visible = true
+  }
+
+  fn showError() {
+    text = "Something went wrong. Please try again."
+    isInfo = false
+    isSuccess = false
+    isError = true
+    visible = true
+  }
+
+  fn dismiss() { visible = false }
+</script>
+<template>
+  <div class="demo">
+    <div class="buttons">
+      <button class="btn-info" @click="showInfo">Show Info</button>
+      <button class="btn-success" @click="showSuccess">Show Success</button>
+      <button class="btn-error" @click="showError">Show Error</button>
+    </div>
+    <#if condition="visible">
+      <div :class="isError ? 'toast toast--error' : isSuccess ? 'toast toast--success' : 'toast toast--info'">
+        <span class="toast-text">{{ text }}</span>
+        <button class="toast-close" @click="dismiss">&#x2715;</button>
+      </div>
+    </#if>
+  </div>
+</template>
+<style>
+  :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .demo { position: relative; min-height: 120px; }
+  .buttons { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+  .buttons button {
+    padding: 0.5rem 1rem; border: none; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  }
+  .buttons button:hover { opacity: 0.85; }
+  .btn-info { background: #1e40af; color: #dbeafe; }
+  .btn-success { background: #166534; color: #dcfce7; }
+  .btn-error { background: #991b1b; color: #fee2e2; }
+  .toast {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.85rem 1.25rem; border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: slideIn 0.3s ease;
+  }
+  .toast--info { background: #1e40af; color: #dbeafe; }
+  .toast--success { background: #166534; color: #dcfce7; }
+  .toast--error { background: #991b1b; color: #fee2e2; }
+  .toast-text { flex: 1; font-size: 0.9rem; font-weight: 500; }
+  .toast-close { background: none; border: none; color: inherit; opacity: 0.7; cursor: pointer; font-size: 1rem; padding: 0; }
+  .toast-close:hover { opacity: 1; }
+  @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>

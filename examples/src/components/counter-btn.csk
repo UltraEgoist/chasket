@@ -1,0 +1,22 @@
+<meta>
+  name: "x-counter-btn"
+  shadow: open
+</meta>
+
+<script>
+  prop label: string = "+1"
+  emit press: void
+
+  fn handleClick() {
+    press()
+  }
+</script>
+
+<template>
+  <button class="btn" @click="handleClick">{{ label }}</button>
+</template>
+
+<style>
+  .btn { padding: 10px 24px; border: none; border-radius: 8px; background: #667eea; color: white; font-size: 1rem; cursor: pointer; }
+  .btn:hover { background: #5a6fd6; }
+</style>

@@ -1,0 +1,38 @@
+# Development files
+test/
+*.test.js
+.DS_Store
+
+# Git and CI files
+.git/
+.github/
+.gitignore
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.editorconfig
+
+# Dependencies cache
+node_modules/
+package-lock.json
+yarn.lock
+
+# Documentation and examples
+docs/
+examples/
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Build artifacts (if any)
+dist/
+build/
+
+# Other
+.env
+.env.local
+*.log

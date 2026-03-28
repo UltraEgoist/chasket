@@ -1,0 +1,49 @@
+<meta>
+name: "app-shell"
+shadow: open
+</meta>
+
+<script>
+state currentPath: string = ""
+
+fn updatePath() {
+  currentPath = window.location.hash.replace("#", "") || "/"
+}
+
+on mount {
+  updatePath()
+  window.addEventListener("hashchange", () => { updatePath() })
+}
+</script>
+
+<template>
+  <div class="shell">
+    <nav class="nav">
+      <span class="logo">Chasket SPA</span>
+      <div class="links">
+        <a href="#/" :class="currentPath === '/' ? 'active' : ''">Home</a>
+        <a href="#/about" :class="currentPath === '/about' ? 'active' : ''">About</a>
+        <a href="#/users/1" :class="currentPath.startsWith('/users') ? 'active' : ''">Users</a>
+      </div>
+    </nav>
+    <main class="main">
+      <slot></slot>
+    </main>
+    <footer class="footer">
+      <p>Built with Chasket — Template-first Web Components</p>
+    </footer>
+  </div>
+</template>
+
+<style>
+:host { display: block; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: white; border-bottom: 1px solid #e5e7eb; }
+.logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
+.links { display: flex; gap: 1.5rem; }
+.links a { text-decoration: none; color: #6b7280; font-weight: 500; padding: 0.25rem 0; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.links a:hover { color: #111827; }
+.links a.active { color: #f97316; border-bottom-color: #f97316; }
+.main { flex: 1; padding: 2rem; background: #fafafa; }
+.footer { padding: 1rem 2rem; text-align: center; color: #9ca3af; font-size: 0.85rem; border-top: 1px solid #e5e7eb; }
+</style>

@@ -11,22 +11,13 @@ node_modules/
 # Rust
 chasket-compiler-rust/target/
 
-# Reports / generated docs (managed in chasket-internal)
+# Reports / generated docs
 *.docx
 *.xlsx
 
-# Internal documentation
+# Internal documentation (security audit details, progress tracking)
 docs/internal/
 
 # Test artifacts
 examples/src/components/security-test.csk
 chasket-docs/dist/
-
-# Editor
-.vscode/
-*.swp
-*.swo
-*~
-
-# npm
-*.tgz

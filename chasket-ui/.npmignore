@@ -1,0 +1,13 @@
+test/
+*.test.js
+components/
+build.js
+.DS_Store
+.git/
+.github/
+.gitignore
+.vscode/
+node_modules/
+package-lock.json
+yarn.lock
+*.log

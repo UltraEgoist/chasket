@@ -1,0 +1,10 @@
+{
+  "name": "full-test",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "chasket dev",
+    "build": "chasket build",
+    "check": "chasket check"
+  }
+}

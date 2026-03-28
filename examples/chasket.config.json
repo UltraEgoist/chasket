@@ -1,0 +1,9 @@
+{
+  "target": "js",
+  "outdir": "dist",
+  "bundle": "chasket-bundle.js",
+  "shadow": "open",
+  "sourcemap": false,
+  "minify": false,
+  "src": "src/components"
+}

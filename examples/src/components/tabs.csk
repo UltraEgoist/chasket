@@ -1,0 +1,65 @@
+<meta>
+name: "x-tabs"
+shadow: none
+</meta>
+
+<script>
+state activeTab: number = 0
+prop labels: string = "Tab 1,Tab 2,Tab 3"
+
+fn selectTab(index: number) {
+  this.activeTab = index
+}
+</script>
+
+<template>
+  <div class="tabs">
+    <div class="tab-list" role="tablist">
+      <#for each="label, index" of="labels.split(',')" key="label">
+        <button
+          class="tab-btn"
+          @click="selectTab(index)"
+          :class="index === activeTab ? 'active' : ''"
+          role="tab"
+        >
+          {{ label.trim() }}
+        </button>
+      </#for>
+    </div>
+    <div class="tab-panel" role="tabpanel">
+      <slot></slot>
+    </div>
+  </div>
+</template>
+
+<style>
+.tabs {
+  font-family: sans-serif;
+}
+.tab-list {
+  display: flex;
+  border-bottom: 2px solid #e0e0e0;
+}
+.tab-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover {
+  color: #333;
+}
+.tab-btn.active {
+  color: #1976d2;
+  border-bottom-color: #1976d2;
+  font-weight: 600;
+}
+.tab-panel {
+  padding: 16px 0;
+}
+</style>

@@ -1,0 +1,42 @@
+<meta>
+name: "page-home"
+shadow: open
+</meta>
+
+<script>
+state greeting: string = "Chasket SPA Demo"
+</script>
+
+<template>
+  <div class="home">
+    <h1>{{ greeting }}</h1>
+    <p class="lead">
+      Chasket Router を使ったシングルページアプリケーションのデモです。
+    </p>
+    <div class="features">
+      <div class="feature">
+        <h3>Zero Runtime</h3>
+        <p>コンパイル済み Web Components で高速動作</p>
+      </div>
+      <div class="feature">
+        <h3>SPA Routing</h3>
+        <p>ハッシュベースルーティングでページ遷移</p>
+      </div>
+      <div class="feature">
+        <h3>Reactive State</h3>
+        <p>state 宣言で自動 DOM 更新</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+:host { display: block; }
+.home { text-align: center; padding: 2rem; }
+h1 { font-size: 2.5rem; color: #f97316; margin-bottom: 0.5rem; }
+.lead { color: #6b7280; font-size: 1.1rem; margin-bottom: 2rem; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; max-width: 700px; margin: 0 auto; }
+.feature { padding: 1.5rem; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; }
+.feature h3 { color: #111827; margin: 0 0 0.5rem; }
+.feature p { color: #6b7280; margin: 0; font-size: 0.9rem; }
+</style>

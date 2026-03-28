@@ -1,0 +1,51 @@
+<meta>
+  name: "x-app"
+  shadow: open
+</meta>
+
+<script>
+  state count: number = 0
+  state message: string = ""
+
+  fn increment() {
+    count += 1
+    message = `カウント: ${count}`
+  }
+</script>
+
+<template>
+  <div class="app">
+    <h1>Chasket フルテスト</h1>
+
+    <section>
+      <h2>1. ネスト</h2>
+      <x-sample></x-sample>
+    </section>
+
+    <section>
+      <h2>2. emit + prop</h2>
+      <div class="row">
+        <x-counter-btn label="+1" @press="increment"></x-counter-btn>
+        <span class="count">{{ count }}</span>
+      </div>
+      <#if condition="message !== ''">
+        <p class="msg">{{ message }}</p>
+      </#if>
+    </section>
+
+    <section>
+      <h2>3. ループ + bind</h2>
+      <x-todo></x-todo>
+    </section>
+  </div>
+</template>
+
+<style>
+  .app { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 520px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 1.8rem; margin: 0 0 24px; color: #667eea; }
+  h2 { font-size: 1.1rem; color: #444; margin: 20px 0 8px; padding-top: 16px; border-top: 1px solid #eee; }
+  section { margin-bottom: 16px; }
+  .row { display: flex; align-items: center; gap: 16px; }
+  .count { font-size: 2rem; font-weight: 700; color: #667eea; }
+  .msg { margin-top: 8px; padding: 8px 12px; background: #f0f4ff; border-radius: 6px; color: #667eea; font-size: 0.85rem; }
+</style>

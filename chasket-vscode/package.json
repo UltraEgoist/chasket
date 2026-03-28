@@ -1,0 +1,73 @@
+{
+  "name": "chasket-lang",
+  "displayName": "Chasket",
+  "description": "Chasket言語サポート - シンタックスハイライト、型チェック、エラー表示",
+  "version": "0.1.0",
+  "publisher": "aspect",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "chasket",
+    "web components",
+    "custom elements",
+    "template"
+  ],
+  "icon": "icons/chasket-icon.png",
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:chasket"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "chasket",
+        "aliases": [
+          "Chasket",
+          "chasket"
+        ],
+        "extensions": [
+          ".csk"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/chasket-file-light.svg",
+          "dark": "./icons/chasket-file-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "chasket",
+        "scopeName": "source.csk",
+        "path": "./syntaxes/chasket.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.css": "css",
+          "text.html.basic": "html",
+          "source.csk.script": "javascript",
+          "meta.block.template.csk": "html",
+          "meta.block.style.csk": "css"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Chasket",
+      "properties": {
+        "chasket.enableDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "リアルタイム型チェックとエラー表示を有効にする"
+        },
+        "chasket.compilerPath": {
+          "type": "string",
+          "default": "",
+          "description": "chasket-cli の bin/chasket.js へのパス（空の場合はグローバルの chasket コマンドを使用）"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@aspect/vite-plugin-chasket",
+  "version": "0.1.0",
+  "description": "Vite plugin for Chasket (.csk) components — compile .csk files to Web Components with HMR support",
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "plugin",
+    "chasket",
+    "web-components",
+    "compiler",
+    "hmr"
+  ],
+  "author": "Aspect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aspect/chasket.git",
+    "directory": "vite-plugin-chasket"
+  },
+  "homepage": "https://github.com/aspect/chasket#readme",
+  "bugs": {
+    "url": "https://github.com/aspect/chasket/issues"
+  },
+  "peerDependencies": {
+    "vite": ">=4.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/plugin.test.js"
+  }
+}

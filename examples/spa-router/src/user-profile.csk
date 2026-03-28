@@ -1,0 +1,65 @@
+<meta>
+name: "user-profile"
+shadow: open
+</meta>
+
+<script>
+prop uid: string = ""
+
+state userName: string = ""
+state userEmail: string = ""
+state loading: boolean = true
+state initial: string = "?"
+
+fn loadUser() {
+  loading = true
+  const users = {
+    "1": { name: "Alice Johnson", email: "alice@example.com" },
+    "2": { name: "Bob Smith", email: "bob@example.com" },
+    "3": { name: "Charlie Brown", email: "charlie@example.com" }
+  }
+  const user = users[uid]
+  if (user) {
+    userName = user.name
+    userEmail = user.email
+    initial = user.name.substring(0, 1)
+  } else {
+    userName = "Unknown User"
+    userEmail = ""
+    initial = "?"
+  }
+  loading = false
+}
+
+on mount {
+  loadUser()
+}
+</script>
+
+<template>
+  <div class="profile">
+    <#if condition="loading">
+      <p class="loading">Loading...</p>
+    <:else>
+      <div class="card">
+        <div class="avatar">{{ initial }}</div>
+        <h2>{{ userName }}</h2>
+        <#if condition="userEmail">
+          <p class="email">{{ userEmail }}</p>
+        </#if>
+        <p class="id">ID: {{ uid }}</p>
+      </div>
+    </#if>
+  </div>
+</template>
+
+<style>
+:host { display: block; }
+.profile { max-width: 400px; margin: 2rem auto; text-align: center; }
+.loading { color: #9ca3af; font-style: italic; }
+.card { padding: 2rem; border-radius: 16px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+.avatar { width: 64px; height: 64px; border-radius: 50%; background: #f97316; color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+h2 { margin: 0 0 0.25rem; color: #111827; }
+.email { color: #6b7280; margin: 0.25rem 0; }
+.id { color: #9ca3af; font-size: 0.85rem; margin-top: 0.5rem; }
+</style>

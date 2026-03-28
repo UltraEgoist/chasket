@@ -1,0 +1,74 @@
+<meta>
+name: fl-dialog
+shadow: open
+</meta>
+
+<script>
+prop open: boolean = false
+prop title: string = ""
+prop closable: boolean = true
+prop size: "sm" | "md" | "lg" = "md"
+
+emit close: void
+
+fn handleClose() {
+  if (closable) {
+    open = false
+    close()
+  }
+}
+
+fn handleBackdrop(e) {
+  if (e.target === e.currentTarget) {
+    handleClose()
+  }
+}
+</script>
+
+<template>
+  <#if condition="open">
+    <div class="fl-dialog__backdrop" @click="handleBackdrop">
+      <div :class="['fl-dialog', 'fl-dialog--' + size]" role="dialog" aria-modal="true" :aria-label="title">
+        <div class="fl-dialog__header">
+          <#if condition="title">
+            <h2 class="fl-dialog__title">{{ title }}</h2>
+          </#if>
+          <slot name="header"></slot>
+          <#if condition="closable">
+            <button class="fl-dialog__close" @click="handleClose" aria-label="Close">&times;</button>
+          </#if>
+        </div>
+        <div class="fl-dialog__body"><slot></slot></div>
+        <div class="fl-dialog__footer"><slot name="footer"></slot></div>
+      </div>
+    </div>
+  </#if>
+</template>
+
+<style>
+:host { display: contents; }
+.fl-dialog__backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+  animation: fl-dialog-fade 0.15s ease;
+}
+.fl-dialog {
+  background: #fff; border-radius: 12px; box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+  max-height: 85vh; display: flex; flex-direction: column; animation: fl-dialog-slide 0.2s ease;
+}
+.fl-dialog--sm { width: min(24rem, 90vw); }
+.fl-dialog--md { width: min(32rem, 90vw); }
+.fl-dialog--lg { width: min(48rem, 90vw); }
+.fl-dialog__header { display: flex; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
+.fl-dialog__title { flex: 1; margin: 0; font-size: 1.125rem; font-weight: 600; color: #111827; }
+.fl-dialog__close {
+  border: none; background: none; font-size: 1.5rem; color: #6b7280;
+  cursor: pointer; padding: 0 0.25rem; line-height: 1; border-radius: 4px;
+}
+.fl-dialog__close:hover { color: #111827; background: #f3f4f6; }
+.fl-dialog__body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+.fl-dialog__footer { padding: 0.75rem 1.25rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.5rem; }
+.fl-dialog__footer:empty { display: none; }
+@keyframes fl-dialog-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fl-dialog-slide { from { transform: translateY(-12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>

@@ -1,0 +1,80 @@
+<meta>
+  name: "fl-contact-form"
+  shadow: open
+</meta>
+<script>
+  state name: string = ""
+  state email: string = ""
+  state message: string = ""
+  state submitted: boolean = false
+  state errors: string = ""
+  computed showForm: boolean = !submitted
+  computed hasErrors: boolean = errors.length > 0
+
+  fn validate() {
+    if (!name.trim()) { errors = "Name is required"; return }
+    if (!email.trim() || !email.includes('@')) { errors = "Valid email is required"; return }
+    if (!message.trim()) { errors = "Message is required"; return }
+    errors = ""
+    submitted = true
+  }
+</script>
+<template>
+  <div class="form-card">
+    <#if condition="showForm">
+      <h3>Contact Us</h3>
+      <p class="subtitle">We'd love to hear from you</p>
+      <#if condition="hasErrors">
+        <div class="error">{{ errors }}</div>
+      </#if>
+      <div class="field">
+        <label>Name</label>
+        <input type="text" :bind="name" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" :bind="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Message</label>
+        <textarea :bind="message" placeholder="How can we help?" rows="4"></textarea>
+      </div>
+      <button @click="validate">Send Message</button>
+    <:else>
+      <div class="success">
+        <div class="success-icon">&#x2714;</div>
+        <h3>Thank you!</h3>
+        <p>We'll get back to you soon.</p>
+      </div>
+    </#if>
+  </div>
+</template>
+<style>
+  :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .form-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    padding: 2rem; max-width: 440px; margin: 0 auto;
+  }
+  h3 { color: #f8fafc; margin: 0 0 0.25rem; font-size: 1.4rem; }
+  .subtitle { color: #94a3b8; margin: 0 0 1.5rem; font-size: 0.9rem; }
+  .field { margin-bottom: 1rem; }
+  label { display: block; color: #cbd5e1; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; }
+  input, textarea {
+    width: 100%; padding: 0.6rem 0.75rem; background: #0f172a; border: 1px solid #475569;
+    border-radius: 8px; color: #e2e8f0; font-size: 0.9rem; font-family: inherit;
+    box-sizing: border-box; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: #f97316; }
+  textarea { resize: vertical; }
+  button {
+    width: 100%; padding: 0.75rem; background: #f97316; border: none; border-radius: 8px;
+    color: #0f172a; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: background 0.2s; margin-top: 0.5rem;
+  }
+  button:hover { background: #fb923c; }
+  .error { background: #7f1d1d; color: #fca5a5; padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
+  .success { text-align: center; padding: 2rem 0; }
+  .success-icon { font-size: 3rem; margin-bottom: 1rem; color: #22c55e; }
+  .success h3 { font-size: 1.5rem; }
+  .success p { color: #94a3b8; }
+</style>

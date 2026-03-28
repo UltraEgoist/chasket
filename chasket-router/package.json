@@ -1,0 +1,47 @@
+{
+  "name": "@aspect/chasket-router",
+  "version": "0.1.0",
+  "description": "Client-side router for Chasket SPA applications with hash-based routing, navigation guards, and dynamic parameters",
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "chasket",
+    "router",
+    "spa",
+    "web-components",
+    "client-side-routing",
+    "hash-routing",
+    "navigation-guards"
+  ],
+  "author": "Aspect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aspect/chasket.git",
+    "directory": "chasket-router"
+  },
+  "homepage": "https://github.com/aspect/chasket#readme",
+  "bugs": {
+    "url": "https://github.com/aspect/chasket/issues"
+  },
+  "peerDependencies": {
+    "@aspect/chasket": ">=0.1.0"
+  },
+  "scripts": {
+    "test": "node --test test/router.test.js"
+  }
+}

@@ -1,0 +1,66 @@
+<meta>
+name: fl-tabs
+shadow: open
+</meta>
+
+<script>
+prop items: string = ""
+prop active: string = ""
+prop variant: "line" | "pill" = "line"
+
+state selected: string = ""
+
+emit change: string
+
+computed tabList: string = items.split(",").map(t => t.trim()).filter(Boolean)
+
+fn handleSelect(name) {
+  selected = name
+  change(name)
+}
+
+on mount {
+  if (active) {
+    selected = active
+  } else if (tabList.length > 0) {
+    selected = tabList[0]
+  }
+}
+
+watch(active) {
+  selected = active
+}
+</script>
+
+<template>
+  <div class="fl-tabs">
+    <div :class="['fl-tabs__nav', 'fl-tabs__nav--' + variant]" role="tablist">
+      <#for each="tab" of="tabList">
+        <button
+          :class="['fl-tabs__tab', tab === selected ? 'fl-tabs__tab--active' : '']"
+          role="tab"
+          @click="handleSelect(tab)"
+        >{{ tab }}</button>
+      </#for>
+    </div>
+    <div class="fl-tabs__panel" role="tabpanel">
+      <slot></slot>
+    </div>
+  </div>
+</template>
+
+<style>
+:host { display: block; }
+.fl-tabs__nav { display: flex; gap: 0.25rem; margin-bottom: 1rem; }
+.fl-tabs__nav--line { border-bottom: 2px solid #e5e7eb; gap: 0; }
+.fl-tabs__tab {
+  padding: 0.5rem 1rem; border: none; background: none; font: inherit;
+  font-size: 0.875rem; font-weight: 500; color: #6b7280; cursor: pointer;
+  transition: color 0.15s, background 0.15s; border-radius: 6px; position: relative;
+}
+.fl-tabs__nav--line .fl-tabs__tab { border-radius: 0; margin-bottom: -2px; border-bottom: 2px solid transparent; }
+.fl-tabs__tab:hover { color: #374151; }
+.fl-tabs__nav--line .fl-tabs__tab--active { color: #3b82f6; border-bottom-color: #3b82f6; }
+.fl-tabs__nav--pill .fl-tabs__tab--active { background: #3b82f6; color: #fff; }
+.fl-tabs__panel { min-height: 2rem; }
+</style>
