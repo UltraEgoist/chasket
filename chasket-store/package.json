@@ -1,6 +1,6 @@
 {
   "name": "@aspect/chasket-store",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Reactive global state management for Chasket applications with actions, getters, middleware, and undo/redo",
   "main": "index.js",
   "module": "index.mjs",
@@ -31,14 +31,17 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aspect/chasket.git",
+    "url": "https://github.com/UltraEgoist/chasket.git",
     "directory": "chasket-store"
   },
-  "homepage": "https://github.com/aspect/chasket#readme",
+  "homepage": "https://github.com/UltraEgoist/chasket#readme",
   "bugs": {
-    "url": "https://github.com/aspect/chasket/issues"
+    "url": "https://github.com/UltraEgoist/chasket/issues"
   },
   "scripts": {
     "test": "node --test test/store.test.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
