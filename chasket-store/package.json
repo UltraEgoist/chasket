@@ -1,6 +1,6 @@
 {
   "name": "@chasket/chasket-store",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Reactive global state management for Chasket applications with actions, getters, middleware, and undo/redo",
   "main": "index.js",
   "module": "index.mjs",
