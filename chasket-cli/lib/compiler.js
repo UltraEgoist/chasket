@@ -1902,29 +1902,30 @@ function generate(c, options) {
     allIds.sort((a, b) => b.length - a.length);
 
     // State variables: myVar -> this.#myVar
-    // (?<![.#]) ensures we don't replace property accesses like obj.filter or already-prefixed #filter
-    for(const s of sv) reps.push([new RegExp(`(?<![.#])\\b${escRx(s)}\\b`,'g'), `this.#${s}`]);
+    // (?<!(?<!\.)\.|\#) ensures we don't replace property accesses like obj.filter
+    // or already-prefixed #filter, but DO replace after spread operator (...)
+    for(const s of sv) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(s)}\\b`,'g'), `this.#${s}`]);
 
     // Props: title -> this.#prop_title (props stored in separate fields)
-    for(const p of pv) reps.push([new RegExp(`(?<![.#])\\b${escRx(p)}\\b`,'g'), `this.#prop_${p}`]);
+    for(const p of pv) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(p)}\\b`,'g'), `this.#prop_${p}`]);
 
     // Computed: doubled -> this.#doubled (calls private getter)
-    for(const v of cv) reps.push([new RegExp(`(?<![.#])\\b${escRx(v)}\\b`,'g'), `this.#${v}`]);
+    for(const v of cv) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(v)}\\b`,'g'), `this.#${v}`]);
 
     // Emit: emit(change) -> this.#emit_change( (calls emit method)
-    for(const e of en) reps.push([new RegExp(`(?<![.#])\\b${escRx(e)}\\(`,'g'), `this.#emit_${e}(`]);
+    for(const e of en) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(e)}\\(`,'g'), `this.#emit_${e}(`]);
 
     // Functions: increment() -> this.#increment() (calls private method)
-    for(const f of fn) reps.push([new RegExp(`(?<![.#])\\b${escRx(f)}\\(`,'g'), `this.#${f}(`]);
+    for(const f of fn) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(f)}\\(`,'g'), `this.#${f}(`]);
 
     // Refs: inputEl -> this.#inputEl (access private ref field)
-    for(const ref of rn) reps.push([new RegExp(`(?<![.#])\\b${escRx(ref)}\\b`,'g'), `this.#${ref}`]);
+    for(const ref of rn) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(ref)}\\b`,'g'), `this.#${ref}`]);
 
     // Consume: user -> this.#user (access consumed context value)
-    for(const co of cons) reps.push([new RegExp(`(?<![.#])\\b${escRx(co)}\\b`,'g'), `this.#${co}`]);
+    for(const co of cons) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(co)}\\b`,'g'), `this.#${co}`]);
 
     // Const/Let: myConst -> this.#myConst (access private field)
-    for(const v of cn_vars) reps.push([new RegExp(`(?<![.#])\\b${escRx(v)}\\b`,'g'), `this.#${v}`]);
+    for(const v of cn_vars) reps.push([new RegExp(`(?<!(?<!\\.)\\.|\\#)\\b${escRx(v)}\\b`,'g'), `this.#${v}`]);
 
     // Form-associated helpers: setFormValue() -> this.#setFormValue(), setValidity() -> this.#setValidity()
     if (c.meta.form) {
@@ -3034,7 +3035,9 @@ function generate(c, options) {
   o+=`        const oA = o.attributes, nA = n.attributes;\n`;
   o+=`        for (let j = nA.length - 1; j >= 0; j--) {\n`;
   o+=`          const a = nA[j];\n`;
-  o+=`          if (o.getAttribute(a.name) !== a.value) o.setAttribute(a.name, a.value);\n`;
+  o+=`          if (a.name === 'value' && (o.tagName === 'INPUT' || o.tagName === 'TEXTAREA' || o.tagName === 'SELECT')) {\n`;
+  o+=`            if (o.value !== a.value) o.value = a.value;\n`;
+  o+=`          } else if (o.getAttribute(a.name) !== a.value) o.setAttribute(a.name, a.value);\n`;
   o+=`        }\n`;
   o+=`        for (let j = oA.length - 1; j >= 0; j--) {\n`;
   o+=`          if (!n.hasAttribute(oA[j].name)) o.removeAttribute(oA[j].name);\n`;
