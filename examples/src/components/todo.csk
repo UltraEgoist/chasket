@@ -1,0 +1,51 @@
+<meta>
+  name: "x-todo"
+  shadow: open
+</meta>
+
+<script>
+  state items: string[] = []
+  state text: string = ""
+
+  fn add() {
+    if (text.trim() === "") return
+    items = [...items, text.trim()]
+    text = ""
+  }
+
+  fn remove(index: number) {
+    items = items.filter((t, i) => i !== index)
+  }
+</script>
+
+<template>
+  <div class="todo">
+    <div class="input-row">
+      <input class="inp" :bind="text" placeholder="追加..." @keydown|enter="add" />
+      <button class="add" @click="add">追加</button>
+    </div>
+    <ul>
+      <#for each="item, index" of="items" key="item">
+        <li class="item">
+          <span>{{ item }}</span>
+          <button class="del" @click="remove(index)">×</button>
+        </li>
+        <:empty>
+          <li class="empty">リストは空です</li>
+        </:empty>
+      </#for>
+    </ul>
+  </div>
+</template>
+
+<style>
+  .todo { max-width: 360px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .inp { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+  .inp:focus { border-color: #667eea; }
+  .add { padding: 8px 16px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer; }
+  ul { list-style: none; padding: 0; }
+  .item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .del { background: none; border: none; color: #e94560; cursor: pointer; font-size: 1.1rem; }
+  .empty { color: #aaa; font-style: italic; padding: 12px 0; }
+</style>

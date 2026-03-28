@@ -1,0 +1,70 @@
+<meta>
+  name: "fl-accordion"
+  shadow: open
+</meta>
+<script>
+  state open: number = -1
+  fn toggle0() { open = open === 0 ? -1 : 0 }
+  fn toggle1() { open = open === 1 ? -1 : 1 }
+  fn toggle2() { open = open === 2 ? -1 : 2 }
+  fn toggle3() { open = open === 3 ? -1 : 3 }
+</script>
+<template>
+  <div class="accordion">
+    <div class="item" :class="open === 0 ? 'item--open' : ''">
+      <button class="header" @click="toggle0">
+        <span>What is Chasket?</span>
+        <span class="icon">&#x25BC;</span>
+      </button>
+      <div class="body">
+        <p>Chasket is a template-first Web Components framework. You write single-file <code>.csk</code> components and the compiler generates native Web Components with zero runtime dependencies.</p>
+      </div>
+    </div>
+    <div class="item" :class="open === 1 ? 'item--open' : ''">
+      <button class="header" @click="toggle1">
+        <span>Does it work with React / Vue / Angular?</span>
+        <span class="icon">&#x25BC;</span>
+      </button>
+      <div class="body">
+        <p>Yes! Chasket components compile to standard Web Components, which work in any framework or plain HTML. Just include the script and use the custom element tag.</p>
+      </div>
+    </div>
+    <div class="item" :class="open === 2 ? 'item--open' : ''">
+      <button class="header" @click="toggle2">
+        <span>Is Chasket production-ready?</span>
+        <span class="icon">&#x25BC;</span>
+      </button>
+      <div class="body">
+        <p>Chasket is currently in beta with 607+ tests and 32 security fixes. It's suitable for internal tools, landing pages, and progressive enhancement of existing sites.</p>
+      </div>
+    </div>
+    <div class="item" :class="open === 3 ? 'item--open' : ''">
+      <button class="header" @click="toggle3">
+        <span>How big is the output?</span>
+        <span class="icon">&#x25BC;</span>
+      </button>
+      <div class="body">
+        <p>Zero runtime — just your component code. A typical component compiles to 3-5 KB of vanilla JavaScript with no framework overhead.</p>
+      </div>
+    </div>
+  </div>
+</template>
+<style>
+  :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 640px; margin: 0 auto; }
+  .accordion { border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+  .item { border-bottom: 1px solid #334155; }
+  .item:last-child { border-bottom: none; }
+  .header {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.25rem; background: #1e293b; border: none; color: #e2e8f0;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: left;
+    transition: background 0.2s;
+  }
+  .header:hover { background: #263248; }
+  .icon { font-size: 0.7rem; transition: transform 0.3s; color: #64748b; }
+  .item--open .icon { transform: rotate(180deg); color: #f97316; }
+  .body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+  .item--open .body { max-height: 200px; padding: 0 1.25rem 1rem; }
+  .body p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin: 0; }
+  code { background: #0f172a; color: #fbbf24; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+</style>

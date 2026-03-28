@@ -1,0 +1,72 @@
+{
+  "comments": {
+    "lineComment": "//",
+    "blockComment": ["/*", "*/"]
+  },
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["<", ">"]
+  ],
+  "autoClosingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"" },
+    { "open": "'", "close": "'" },
+    { "open": "`", "close": "`" },
+    { "open": "{{", "close": "}}" },
+    { "open": "<", "close": ">", "notIn": ["string"] },
+    { "open": "/**", "close": " */", "notIn": ["string"] },
+    { "open": "<meta>", "close": "</meta>" },
+    { "open": "<script>", "close": "</script>" },
+    { "open": "<template>", "close": "</template>" },
+    { "open": "<style>", "close": "</style>" },
+    { "open": "<#if", "close": "</#if>" },
+    { "open": "<#for", "close": "</#for>" }
+  ],
+  "surroundingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"" },
+    { "open": "'", "close": "'" },
+    { "open": "`", "close": "`" },
+    { "open": "{{", "close": "}}" }
+  ],
+  "folding": {
+    "markers": {
+      "start": "^\\s*<(meta|script|template|style|#if|#for)",
+      "end": "^\\s*</(meta|script|template|style|#if|#for)>"
+    }
+  },
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+      "afterText": "^\\s*\\*/$",
+      "action": { "indent": "indentAndOutdent", "appendText": " * " }
+    },
+    {
+      "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+      "action": { "indent": "none", "appendText": " * " }
+    },
+    {
+      "beforeText": "^(\\t|[ ])*[ ]\\*([ ]([^\\*]|\\*(?!/))*)?$",
+      "action": { "indent": "none", "appendText": "* " }
+    },
+    {
+      "beforeText": "^(\\t|[ ])*[ ]\\*/\\s*$",
+      "action": { "indent": "none", "removeText": 1 }
+    },
+    {
+      "beforeText": "^(\\t|[ ])*[ ]\\*[^/]*\\*/\\s*$",
+      "action": { "indent": "none", "removeText": 1 }
+    }
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*<(meta|script|template|style|#if|#for|\\w+[^/]*)>\\s*$|\\{\\s*$",
+    "decreaseIndentPattern": "^\\s*</(meta|script|template|style|#if|#for|\\w+)>|^\\s*\\}"
+  },
+  "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)"
+}

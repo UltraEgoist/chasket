@@ -1,0 +1,64 @@
+<meta>
+name: fl-button
+shadow: open
+</meta>
+
+<script>
+prop variant: "primary" | "secondary" | "danger" | "ghost" = "primary"
+prop size: "sm" | "md" | "lg" = "md"
+prop disabled: boolean = false
+prop loading: boolean = false
+
+emit press: void
+
+fn handleClick(e) {
+  if (!disabled && !loading) {
+    press()
+  }
+}
+</script>
+
+<template>
+  <button
+    :class="['fl-btn', 'fl-btn--' + variant, 'fl-btn--' + size, disabled ? 'fl-btn--disabled' : '', loading ? 'fl-btn--loading' : '']"
+    :disabled="disabled || loading"
+    @click="handleClick"
+  >
+    <#if condition="loading">
+      <span class="fl-btn__spinner"></span>
+    </#if>
+    <span class="fl-btn__content">
+      <slot></slot>
+    </span>
+  </button>
+</template>
+
+<style>
+:host { display: inline-block; }
+.fl-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  border: none; border-radius: 6px; font-family: inherit; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
+  line-height: 1; white-space: nowrap;
+}
+.fl-btn:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+.fl-btn--sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+.fl-btn--md { padding: 0.5rem 1rem; font-size: 0.875rem; }
+.fl-btn--lg { padding: 0.625rem 1.5rem; font-size: 1rem; }
+.fl-btn--primary { background: #3b82f6; color: #fff; }
+.fl-btn--primary:hover:not(:disabled) { background: #2563eb; }
+.fl-btn--secondary { background: #e5e7eb; color: #1f2937; }
+.fl-btn--secondary:hover:not(:disabled) { background: #d1d5db; }
+.fl-btn--danger { background: #ef4444; color: #fff; }
+.fl-btn--danger:hover:not(:disabled) { background: #dc2626; }
+.fl-btn--ghost { background: transparent; color: #3b82f6; }
+.fl-btn--ghost:hover:not(:disabled) { background: #eff6ff; }
+.fl-btn--disabled { opacity: 0.5; cursor: not-allowed; }
+.fl-btn--loading { cursor: wait; }
+.fl-btn__spinner {
+  display: inline-block; width: 1em; height: 1em;
+  border: 2px solid currentColor; border-right-color: transparent;
+  border-radius: 50%; animation: fl-spin 0.6s linear infinite;
+}
+@keyframes fl-spin { to { transform: rotate(360deg); } }
+</style>

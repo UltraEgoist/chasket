@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Syntax check
+        run: |
+          node -c chasket-cli/lib/compiler.js
+          node -c chasket-cli/bin/chasket.js
+          node -c chasket-vscode/extension.js
+          node -c chasket-ssr/index.js
+          node -c chasket-lsp/server.js
+
+      - name: Run all tests
+        run: npm test
+
+      - name: Build examples
+        run: node chasket-cli/bin/chasket.js build examples/src/components
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build Rust compiler
+        run: cd chasket-compiler-rust && cargo build
+      - name: Run Rust tests
+        run: cd chasket-compiler-rust && cargo test

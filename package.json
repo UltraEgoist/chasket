@@ -1,0 +1,39 @@
+{
+  "name": "chasket-monorepo",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Chasket - Template-first Web Component language",
+  "workspaces": [
+    "chasket-cli",
+    "chasket-vscode",
+    "vite-plugin-chasket",
+    "chasket-router",
+    "chasket-store",
+    "chasket-ui",
+    "chasket-lsp",
+    "chasket-ssr"
+  ],
+  "scripts": {
+    "build": "cd chasket-cli && npm run build",
+    "test": "node --test chasket-cli/test/compiler.test.js chasket-cli/test/cli.test.js chasket-cli/test/e2e.test.js chasket-ssr/test/ssr.test.js vite-plugin-chasket/test/plugin.test.js chasket-router/test/router.test.js chasket-store/test/store.test.js chasket-ui/test/components.test.js chasket-lsp/test/lsp.test.js",
+    "test:devserver": "node --test chasket-cli/test/devserver.test.js",
+    "test:all": "npm test && npm run test:devserver",
+    "check": "cd examples && node ../chasket-cli/bin/chasket.js check",
+    "lint": "node -c chasket-cli/lib/compiler.js && node -c chasket-cli/bin/chasket.js && node -c chasket-vscode/extension.js && node -c chasket-lsp/server.js && node -c chasket-ssr/index.js",
+    "test:security": "node --test test/security.test.js",
+    "docs:build": "node chasket-docs/build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UltraEgoist/chasket.git"
+  },
+  "homepage": "https://github.com/UltraEgoist/chasket#readme",
+  "bugs": {
+    "url": "https://github.com/UltraEgoist/chasket/issues"
+  },
+  "author": "Aspect",
+  "license": "MIT",
+  "volta": {
+    "node": "22.12.0"
+  }
+}

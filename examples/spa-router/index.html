@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chasket SPA Router Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #fafafa; }
+  </style>
+</head>
+<body>
+  <app-shell>
+    <!-- Router handles content switching based on hash -->
+    <div id="router-outlet"></div>
+  </app-shell>
+
+  <script src="dist/spa-bundle.js"></script>
+  <script src="../../chasket-router/index.js"></script>
+  <script>
+    // Simple hash-based routing
+    const outlet = document.getElementById('router-outlet');
+    const routes = {
+      '/': 'page-home',
+      '/about': 'page-about',
+      '/users/:uid': 'user-profile',
+    };
+
+    function matchRoute(hash) {
+      const path = hash.replace('#', '') || '/';
+      // Exact match
+      if (routes[path]) return { component: routes[path], params: {} };
+      // Dynamic params
+      for (const [pattern, component] of Object.entries(routes)) {
+        const parts = pattern.split('/');
+        const pathParts = path.split('/');
+        if (parts.length !== pathParts.length) continue;
+        const params = {};
+        let match = true;
+        for (let i = 0; i < parts.length; i++) {
+          if (parts[i].startsWith(':')) {
+            params[parts[i].slice(1)] = pathParts[i];
+          } else if (parts[i] !== pathParts[i]) {
+            match = false; break;
+          }
+        }
+        if (match) return { component, params };
+      }
+      return { component: 'page-not-found', params: {} };
+    }
+
+    function navigate() {
+      const { component, params } = matchRoute(location.hash);
+      const el = document.createElement(component);
+      for (const [key, value] of Object.entries(params)) {
+        el.setAttribute(key, value);
+      }
+      outlet.innerHTML = '';
+      outlet.appendChild(el);
+    }
+
+    window.addEventListener('hashchange', navigate);
+    navigate();
+  </script>
+</body>
+</html>

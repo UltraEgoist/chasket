@@ -1,0 +1,77 @@
+<meta>
+name: "x-alert"
+shadow: none
+</meta>
+
+<script>
+prop type: string = "info"
+prop dismissible: boolean = false
+state visible: boolean = true
+
+fn dismiss() {
+  this.visible = false
+}
+</script>
+
+<template>
+  <div class="alert" :class="type" #if="visible">
+    <span class="alert-icon">
+      {{ type === 'success' ? '✓' : type === 'warning' ? '⚠' : type === 'error' ? '✕' : 'ℹ' }}
+    </span>
+    <div class="alert-content">
+      <slot></slot>
+    </div>
+    <button class="alert-close" @click="dismiss" #if="dismissible">×</button>
+  </div>
+</template>
+
+<style>
+.alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-family: sans-serif;
+  font-size: 0.95rem;
+  gap: 10px;
+}
+.alert.info {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+.alert.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+.alert.warning {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+.alert.error {
+  background: #fbe9e7;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+.alert-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.alert-content {
+  flex: 1;
+}
+.alert-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.6;
+  color: inherit;
+}
+.alert-close:hover {
+  opacity: 1;
+}
+</style>

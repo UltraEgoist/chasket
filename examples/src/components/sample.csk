@@ -1,0 +1,17 @@
+<meta>
+  name: "x-sample"
+  shadow: open
+</meta>
+
+<template>
+  <div class="sample">
+    <h2>Sample Component</h2>
+    <p>This is a nested child component.</p>
+  </div>
+</template>
+
+<style>
+  .sample { border: 2px solid #e94560; padding: 16px; border-radius: 8px; margin: 12px 0; }
+  h2 { color: #e94560; font-size: 1rem; margin: 0 0 8px; }
+  p { color: #666; margin: 0; }
+</style>

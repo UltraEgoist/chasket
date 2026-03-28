@@ -1,0 +1,106 @@
+<meta>
+name: fl-input
+shadow: open
+form: true
+</meta>
+
+<script>
+prop label: string = ""
+prop placeholder: string = ""
+prop value: string = ""
+prop disabled: boolean = false
+prop required: boolean = false
+prop error: string = ""
+prop hint: string = ""
+
+state focused: boolean = false
+
+emit input: string
+emit change: string
+
+ref inputEl: HTMLInputElement
+
+fn handleInput(e) {
+  value = e.target.value
+  input(value)
+  setFormValue(value)
+  if (required && !value) {
+    setValidity({ valueMissing: true }, "Required")
+  } else {
+    setValidity({})
+  }
+}
+
+fn handleChange(e) {
+  change(e.target.value)
+}
+
+fn handleFocus() {
+  focused = true
+}
+
+fn handleBlur() {
+  focused = false
+}
+
+on formReset {
+  value = ""
+  setFormValue("")
+  setValidity({})
+}
+</script>
+
+<template>
+  <div :class="['fl-input', focused ? 'fl-input--focused' : '', error ? 'fl-input--error' : '', disabled ? 'fl-input--disabled' : '']">
+    <#if condition="label">
+      <label class="fl-input__label">{{ label }}
+        <#if condition="required"><span class="fl-input__required">*</span></#if>
+      </label>
+    </#if>
+    <div class="fl-input__wrapper">
+      <slot name="prefix"></slot>
+      <input
+        ref="inputEl"
+        class="fl-input__field"
+        :value="value"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :required="required"
+        @input="handleInput"
+        @change="handleChange"
+        @focus="handleFocus"
+        @blur="handleBlur"
+      />
+      <slot name="suffix"></slot>
+    </div>
+    <#if condition="error">
+      <p class="fl-input__error">{{ error }}</p>
+    </#if>
+    <#if condition="hint">
+      <p class="fl-input__hint">{{ hint }}</p>
+    </#if>
+  </div>
+</template>
+
+<style>
+:host { display: block; }
+.fl-input { margin-bottom: 0.75rem; }
+.fl-input__label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
+.fl-input__required { color: #ef4444; margin-left: 2px; }
+.fl-input__wrapper {
+  display: flex; align-items: center; border: 1px solid #d1d5db;
+  border-radius: 6px; background: #fff; transition: border-color 0.15s, box-shadow 0.15s; overflow: hidden;
+}
+.fl-input--focused .fl-input__wrapper { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+.fl-input--error .fl-input__wrapper { border-color: #ef4444; }
+.fl-input--error.fl-input--focused .fl-input__wrapper { box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+.fl-input__field {
+  flex: 1; border: none; outline: none; padding: 0.5rem 0.75rem;
+  font: inherit; font-size: 0.875rem; color: #1f2937; background: transparent;
+}
+.fl-input__field::placeholder { color: #9ca3af; }
+.fl-input__field:disabled { cursor: not-allowed; opacity: 0.5; }
+.fl-input__error { font-size: 0.75rem; color: #ef4444; margin: 0.25rem 0 0; }
+.fl-input__hint { font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0; }
+::slotted([slot="prefix"]), ::slotted([slot="suffix"]) { display: flex; align-items: center; padding: 0 0.5rem; color: #6b7280; }
+</style>

@@ -1,0 +1,66 @@
+<meta>
+name: fl-toggle
+shadow: open
+form: true
+</meta>
+
+<script>
+prop checked: boolean = false
+prop disabled: boolean = false
+prop label: string = ""
+prop size: "sm" | "md" = "md"
+
+emit change: boolean
+
+fn handleToggle() {
+  if (!disabled) {
+    checked = !checked
+    change(checked)
+    setFormValue(checked ? "on" : "")
+  }
+}
+
+on formReset {
+  checked = false
+  setFormValue("")
+}
+</script>
+
+<template>
+  <label :class="['fl-toggle', 'fl-toggle--' + size, disabled ? 'fl-toggle--disabled' : '']">
+    <button
+      class="fl-toggle__track"
+      role="switch"
+      :aria-checked="checked ? 'true' : 'false'"
+      :disabled="disabled"
+      @click="handleToggle"
+    >
+      <span :class="['fl-toggle__thumb', checked ? 'fl-toggle__thumb--on' : '']"></span>
+    </button>
+    <#if condition="label">
+      <span class="fl-toggle__label">{{ label }}</span>
+    </#if>
+  </label>
+</template>
+
+<style>
+:host { display: inline-block; }
+.fl-toggle { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.fl-toggle--disabled { opacity: 0.5; cursor: not-allowed; }
+.fl-toggle__track {
+  position: relative; border: none; border-radius: 999px;
+  background: #d1d5db; cursor: inherit; padding: 0; transition: background 0.2s;
+}
+.fl-toggle--sm .fl-toggle__track { width: 2rem; height: 1.125rem; }
+.fl-toggle--md .fl-toggle__track { width: 2.75rem; height: 1.5rem; }
+.fl-toggle__track:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+.fl-toggle__thumb {
+  position: absolute; top: 2px; left: 2px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.fl-toggle--sm .fl-toggle__thumb { width: 0.875rem; height: 0.875rem; }
+.fl-toggle--md .fl-toggle__thumb { width: 1.25rem; height: 1.25rem; }
+.fl-toggle--sm .fl-toggle__thumb--on { transform: translateX(0.875rem); }
+.fl-toggle--md .fl-toggle__thumb--on { transform: translateX(1.25rem); }
+.fl-toggle__label { font-size: 0.875rem; color: #374151; user-select: none; }
+</style>

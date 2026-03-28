@@ -1,0 +1,37 @@
+<meta>
+name: fl-badge
+shadow: open
+</meta>
+
+<script>
+prop variant: "default" | "primary" | "success" | "warning" | "danger" = "default"
+prop size: "sm" | "md" = "md"
+prop pill: boolean = false
+prop dot: boolean = false
+</script>
+
+<template>
+  <span :class="['fl-badge', 'fl-badge--' + variant, 'fl-badge--' + size, pill ? 'fl-badge--pill' : '', dot ? 'fl-badge--dot' : '']">
+    <#if condition="dot">
+      <span class="fl-badge__dot-indicator"></span>
+    </#if>
+    <slot></slot>
+  </span>
+</template>
+
+<style>
+:host { display: inline-flex; }
+.fl-badge {
+  display: inline-flex; align-items: center; gap: 0.375em;
+  font-weight: 500; border-radius: 4px; white-space: nowrap;
+}
+.fl-badge--sm { font-size: 0.6875rem; padding: 0.125rem 0.5rem; }
+.fl-badge--md { font-size: 0.75rem; padding: 0.175rem 0.625rem; }
+.fl-badge--pill { border-radius: 9999px; }
+.fl-badge--default { background: #f3f4f6; color: #374151; }
+.fl-badge--primary { background: #dbeafe; color: #1d4ed8; }
+.fl-badge--success { background: #d1fae5; color: #065f46; }
+.fl-badge--warning { background: #fef3c7; color: #92400e; }
+.fl-badge--danger  { background: #fee2e2; color: #991b1b; }
+.fl-badge__dot-indicator { width: 0.5em; height: 0.5em; border-radius: 50%; background: currentColor; }
+</style>

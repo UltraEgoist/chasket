@@ -1,0 +1,36 @@
+<meta>
+name: "page-about"
+shadow: open
+</meta>
+
+<script>
+state version: string = "0.2.0"
+</script>
+
+<template>
+  <div class="about">
+    <h1>About Chasket</h1>
+    <p>
+      Chasket はテンプレートファーストの Web Component コンパイラです。
+      .csk ファイルにコンポーネントを記述し、ネイティブな Custom Elements にコンパイルします。
+    </p>
+    <dl>
+      <dt>Version</dt>
+      <dd>{{ version }}</dd>
+      <dt>License</dt>
+      <dd>MIT</dd>
+      <dt>Runtime</dt>
+      <dd>Zero — 標準 Web Components のみ</dd>
+    </dl>
+  </div>
+</template>
+
+<style>
+:host { display: block; }
+.about { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+h1 { color: #111827; border-bottom: 2px solid #f97316; padding-bottom: 0.5rem; }
+p { color: #4b5563; line-height: 1.7; }
+dl { margin-top: 1.5rem; }
+dt { font-weight: 700; color: #374151; margin-top: 1rem; }
+dd { margin: 0.25rem 0 0 0; color: #6b7280; }
+</style>

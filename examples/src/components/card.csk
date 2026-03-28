@@ -1,0 +1,61 @@
+<meta>
+name: "x-card"
+shadow: open
+</meta>
+
+<script>
+prop title: string = "Card Title"
+prop variant: string = "default"
+</script>
+
+<template>
+  <div class="card" :class="variant">
+    <div class="card-header">
+      <h3>{{ title }}</h3>
+      <slot name="actions"></slot>
+    </div>
+    <div class="card-body">
+      <slot></slot>
+    </div>
+    <div class="card-footer">
+      <slot name="footer"></slot>
+    </div>
+  </div>
+</template>
+
+<style>
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+.card.primary {
+  border-color: #1976d2;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+.card.primary .card-header {
+  background: #1976d2;
+  color: white;
+  border-bottom-color: #1565c0;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.card-body {
+  padding: 16px;
+}
+.card-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+</style>
