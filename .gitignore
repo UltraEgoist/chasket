@@ -1,0 +1,32 @@
+# OS
+**/.DS_Store
+
+# Build output
+dist/
+examples/dist/
+
+# Node
+node_modules/
+
+# Rust
+chasket-compiler-rust/target/
+
+# Reports / generated docs (managed in chasket-internal)
+*.docx
+*.xlsx
+
+# Internal documentation
+docs/internal/
+
+# Test artifacts
+examples/src/components/security-test.csk
+chasket-docs/dist/
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# npm
+*.tgz

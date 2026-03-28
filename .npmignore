@@ -1,0 +1,20 @@
+# Development files
+test/
+*.test.js
+.github/
+docs/
+examples/
+chasket-docs/
+chasket-compiler-rust/
+chasket-vscode/
+
+# Build tools
+.gitignore
+.npmignore
+CONTRIBUTING.md
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
