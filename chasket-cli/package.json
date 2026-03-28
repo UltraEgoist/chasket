@@ -32,12 +32,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aspect/chasket.git",
+    "url": "https://github.com/UltraEgoist/chasket.git",
     "directory": "chasket-cli"
   },
-  "homepage": "https://github.com/aspect/chasket#readme",
+  "homepage": "https://github.com/UltraEgoist/chasket#readme",
   "bugs": {
-    "url": "https://github.com/aspect/chasket/issues"
+    "url": "https://github.com/UltraEgoist/chasket/issues"
   },
   "engines": {
     "node": ">=18.0.0"

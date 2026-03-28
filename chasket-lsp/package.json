@@ -10,8 +10,25 @@
     "test": "node --test test/lsp.test.js",
     "start": "node bin/chasket-lsp.js --stdio"
   },
-  "keywords": ["chasket", "lsp", "language-server"],
+  "keywords": [
+    "chasket",
+    "lsp",
+    "language-server"
+  ],
   "license": "MIT",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UltraEgoist/chasket.git"
+  },
+  "homepage": "https://github.com/UltraEgoist/chasket#readme",
+  "bugs": {
+    "url": "https://github.com/UltraEgoist/chasket/issues"
+  },
+  "author": "Aspect",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "types": "index.d.ts"
 }

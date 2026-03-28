@@ -21,7 +21,7 @@ node --version   # v18.0.0 以上であることを確認
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/aspect/chasket.git
+git clone https://github.com/UltraEgoist/chasket.git
 cd chasket
 
 # 新しいプロジェクトを作成

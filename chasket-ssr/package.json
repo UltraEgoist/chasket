@@ -10,7 +10,12 @@
     "index.js",
     "index.d.ts"
   ],
-  "keywords": ["chasket", "ssr", "web-components", "server-side-rendering"],
+  "keywords": [
+    "chasket",
+    "ssr",
+    "web-components",
+    "server-side-rendering"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/UltraEgoist/chasket.git",
@@ -20,6 +25,9 @@
   "bugs": {
     "url": "https://github.com/UltraEgoist/chasket/issues"
   },
-  "author": "UltraEgoist",
-  "license": "MIT"
+  "author": "Aspect",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
