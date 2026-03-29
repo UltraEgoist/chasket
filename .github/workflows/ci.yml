@@ -40,3 +40,16 @@ jobs:
         run: cd chasket-compiler-rust && cargo build
       - name: Run Rust tests
         run: cd chasket-compiler-rust && cargo test
+
+        # Gate job for branch protection — reports a single "test" status check
+  test-gate:
+    name: test
+    runs-on: ubuntu-latest
+    needs: [test, rust]
+    if: always()
+    steps:
+      - run: |
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.rust.result }}" != "success" ]; then
+            echo "test=${{ needs.test.result }}, rust=${{ needs.rust.result }}"
+            exit 1
+          fi
