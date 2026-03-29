@@ -1,5 +1,7 @@
 # @chasket/chasket
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Template-first compiler that transforms `.csk` files into native Web Components.
 
 Zero runtime, zero dependencies. Outputs standard `HTMLElement` classes with Shadow DOM, scoped CSS, and built-in reactivity.

@@ -1,5 +1,7 @@
 # @chasket/vite-plugin-chasket
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Vite plugin for compiling `.csk` files with Hot Module Replacement support.
 
 Zero dependencies (peer-depends on `vite` and `@chasket/chasket`).

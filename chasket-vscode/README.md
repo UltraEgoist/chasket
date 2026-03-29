@@ -1,5 +1,7 @@
 # Chasket for Visual Studio Code
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 `.csk` ファイルの開発サポート拡張機能です。
 
 ## 機能
