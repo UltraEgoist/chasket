@@ -30,6 +30,7 @@
 // ============================================================
 
 const { msg } = require('./messages');
+const __chasketVersion = require('../package.json').version;
 
 // ============================================================
 // PHASE 1: Block Splitter
@@ -2800,18 +2801,24 @@ function generate(c, options) {
   }
 
   // Now generate the class wrapped in IIFE
-  let o = importBlock;
+  let o = `/* Built with Chasket v${__chasketVersion} — https://chasket.dev */\n`;
+  o += importBlock;
   o += `(() => {\n"use strict";\n\n`;
   o += `class ${cn} extends HTMLElement {\n`;
-  // adoptedStyleSheets for CSP-safe styling (Shadow DOM only)
+  // adoptedStyleSheets for CSP-safe styling (both Shadow DOM and shadow: none)
   // Uses CSSStyleSheet constructor when available, falls back to <style> tag
   const hasStyle = !!c.style;
   const cssStr = hasStyle ? (us ? minCss(c.style) : minCss(scopeCss(c.style, tn))) : '';
-  if (hasStyle && us) {
+  if (hasStyle) {
     // Escape backticks and ${} in CSS for safe embedding in template literal
     const safeCss = cssStr.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
     o += `  static #__css = \`${safeCss}\`;\n`;
-    o += `  static #__sheet = (() => { try { const s = new CSSStyleSheet(); s.replaceSync(${cn}.#__css); return s; } catch(e) { return null; } })();\n\n`;
+    o += `  static #__sheet = (() => { try { const s = new CSSStyleSheet(); s.replaceSync(${cn}.#__css); return s; } catch(e) { return null; } })();\n`;
+    if (!us) {
+      // shadow: none: track how many instances are using the document-level sheet
+      o += `  static #__sheetRefCount = 0;\n`;
+    }
+    o += `\n`;
   }
   // Form-associated custom element support
   if (fa) {
@@ -2853,6 +2860,12 @@ function generate(c, options) {
   // shadow: none mode: add scoping attribute for CSS isolation
   if (!us) {
     o+=`    this.setAttribute('data-chasket-scope', '${tn}');\n`;
+    if (hasStyle) {
+      // Adopt stylesheet into document (ref-counted to handle multiple instances)
+      o+=`    if (${cn}.#__sheet && ${cn}.#__sheetRefCount++ === 0) {\n`;
+      o+=`      document.adoptedStyleSheets = [...document.adoptedStyleSheets, ${cn}.#__sheet];\n`;
+      o+=`    }\n`;
+    }
   }
   // Read initial prop values from HTML attributes
   for(const d of c.script) {
@@ -2904,7 +2917,14 @@ function generate(c, options) {
       o+=`    }\n`;
     }
   }
-  for(const d of c.script)if(d.kind==='lifecycle'&&d.event==='unmount')o+=`    ${txBody(d.body).split('\n').join('\n    ')}\n`;o+=`  }\n\n`;
+  for(const d of c.script)if(d.kind==='lifecycle'&&d.event==='unmount')o+=`    ${txBody(d.body).split('\n').join('\n    ')}\n`;
+  // shadow: none: remove adopted stylesheet from document when last instance disconnects
+  if (!us && hasStyle) {
+    o+=`    if (${cn}.#__sheet && --${cn}.#__sheetRefCount === 0) {\n`;
+    o+=`      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(s => s !== ${cn}.#__sheet);\n`;
+    o+=`    }\n`;
+  }
+  o+=`  }\n\n`;
   // Provide: notify consumers when value changes
   for(const d of c.script) {
     if(d.kind==='provide') {
@@ -3011,8 +3031,8 @@ function generate(c, options) {
       // Shadow DOM: use <style> only as fallback when adoptedStyleSheets is unavailable
       o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      // shadow: none: always use <style> tag (scoped via data-chasket-scope)
-      o+=`      <style>${cssStr}</style>\n`;
+      // shadow: none: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     }
   }
   o+=templateStr;
@@ -3028,7 +3048,8 @@ function generate(c, options) {
     if (us) {
       o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      o+=`      <style>${cssStr}</style>\n`;
+      // shadow: none: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     }
   }
   o+=templateStr;

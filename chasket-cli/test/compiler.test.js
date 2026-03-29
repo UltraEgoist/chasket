@@ -3106,8 +3106,9 @@ state x: number = 0
 <template><div>{{x}}</div></template>`;
   const r = compile(src, 'my-app.csk');
   assertSuccess(r);
-  // Output should start with IIFE directly
-  assert.ok(r.output.trimStart().startsWith('(() =>'), 'No imports = IIFE starts directly');
+  // Output should start with Chasket banner comment then IIFE directly (no import statements)
+  assert.ok(r.output.includes('Built with Chasket'), 'Has Chasket banner comment');
+  assert.ok(!r.output.includes('import '), 'No import statements present');
 });
 
 console.log('✓ All import output tests passed');
@@ -4050,7 +4051,7 @@ state count: number = 0
   assert.ok(r.output.includes('#__sheet'), 'should reference #__sheet for conditional rendering');
 });
 
-test('compile - shadow:none component does NOT use adoptedStyleSheets', () => {
+test('compile - shadow:none component uses document.adoptedStyleSheets with ref counting', () => {
   const src = `
 <meta>
 name: x-no-adopt
@@ -4063,12 +4064,32 @@ state count: number = 0
 <style>p { color: blue; }</style>`;
   const r = compile(src, 'x-no-adopt.csk');
   assertSuccess(r);
-  // Should NOT have adoptedStyleSheets (uses <style> with data-chasket-scope)
-  assert.ok(!r.output.includes('adoptedStyleSheets'), 'shadow:none should not use adoptedStyleSheets');
-  assert.ok(!r.output.includes('static #__sheet'), 'shadow:none should not have #__sheet');
-  // Should have inline <style> with scope
-  assert.ok(r.output.includes('<style>'), 'shadow:none should use inline <style>');
+  // Should use adoptedStyleSheets on document (CSP-safe)
+  assert.ok(r.output.includes('document.adoptedStyleSheets'), 'shadow:none should use document.adoptedStyleSheets');
+  assert.ok(r.output.includes('static #__sheet'), 'shadow:none should have #__sheet');
+  assert.ok(r.output.includes('#__sheetRefCount'), 'shadow:none should have ref counting');
+  // Should have scoping attribute for CSS isolation
   assert.ok(r.output.includes('data-chasket-scope'), 'should have data-chasket-scope scoping');
+  // <style> tag should only appear as fallback (when #__sheet is null)
+  assert.ok(r.output.includes("#__sheet ? '' : '<style>'"), 'should use <style> only as fallback');
+});
+
+test('compile - shadow:none disconnectedCallback removes sheet from document', () => {
+  const src = `
+<meta>
+name: x-cleanup
+shadow: none
+</meta>
+<script>
+state v: number = 0
+</script>
+<template><p>{{ v }}</p></template>
+<style>p { color: red; }</style>`;
+  const r = compile(src, 'x-cleanup.csk');
+  assertSuccess(r);
+  // disconnectedCallback should filter the sheet out of document.adoptedStyleSheets
+  assert.ok(r.output.includes('document.adoptedStyleSheets.filter'), 'should clean up sheet on disconnect');
+  assert.ok(r.output.includes('--'), 'should decrement ref count');
 });
 
 test('compile - component without <style> does not generate adoptedStyleSheets', () => {
