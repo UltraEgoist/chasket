@@ -1,6 +1,6 @@
 {
   "name": "@chasket/chasket-lsp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Language Server Protocol implementation for Chasket",
   "main": "server.js",
   "bin": {
