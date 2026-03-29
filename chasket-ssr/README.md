@@ -1,5 +1,7 @@
 # @chasket/chasket-ssr
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Server-side rendering for Chasket components. Render `.csk` files to HTML strings on the server with hydration support for client-side activation.
 
 Zero dependencies.

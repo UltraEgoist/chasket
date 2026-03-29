@@ -1,5 +1,7 @@
 # @chasket/chasket-router
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Client-side SPA router for Chasket applications. History API based routing with dynamic parameters, nested routes, guards, and Web Component integration.
 
 Zero dependencies.

@@ -1,5 +1,7 @@
 # Chasket Rust Compiler
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 A high-performance Rust implementation of the Chasket template-first Web Component compiler.
 
 ## Building

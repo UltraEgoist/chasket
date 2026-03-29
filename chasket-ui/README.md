@@ -1,5 +1,7 @@
 # @chasket/chasket-ui
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Pre-built UI component library for Chasket. All components are native Web Components with Shadow DOM style encapsulation.
 
 Zero dependencies.
