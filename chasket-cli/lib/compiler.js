@@ -30,6 +30,7 @@
 // ============================================================
 
 const { msg } = require('./messages');
+const __chasketVersion = require('../package.json').version;
 
 // ============================================================
 // PHASE 1: Block Splitter
@@ -700,9 +701,9 @@ function parseScript(content, startLine) {
     }
 
     // ─── Watch declarations ───
-    // Format: watch(dep1, dep2, dep3) { ... }
+    // Format: watch(dep1, dep2, dep3) { ... }  or  watch dep { ... }
     // Triggered when any of the dependencies change
-    if ((m = line.match(/^watch\s*\(([^)]+)\)\s*\{/))) {
+    if ((m = line.match(/^watch\s*\(([^)]+)\)\s*\{/)) || (m = line.match(/^watch\s+(\w+(?:\s*,\s*\w+)*)\s*\{/))) {
       const deps = m[1].split(',').map(d=>d.trim());
       // Multi-line block: collect until braces balance
       let body='', bc=1;
@@ -1710,8 +1711,9 @@ function generate(c, options) {
   const missingCloseTagElements = [];
 
   // ─── Event binding ID generator ───
+  // Defense-in-depth: sanitize component name in nextEid even though input validation ensures [a-z0-9-]
   let _eid = 0;
-  function nextEid() { return `fl-${_eid++}`; }
+  function nextEid() { return `fl-${tn.replace(/[^a-z0-9-]/g, '')}-${_eid++}`; }
 
   /**
    * String-aware identifier replacement helper.
@@ -2193,7 +2195,9 @@ function generate(c, options) {
       const body = m[2];
 
       // Handle @media, @keyframes etc. — recurse into the body
-      if (selectorPart.startsWith('@')) {
+      // Strip CSS comments before checking for @ prefix (comments can precede @media)
+      const selectorClean = selectorPart.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+      if (selectorClean.startsWith('@')) {
         return `${selectorPart} { ${scopeCss(body, tagName)} }`;
       }
 
@@ -2798,9 +2802,31 @@ function generate(c, options) {
   }
 
   // Now generate the class wrapped in IIFE
-  let o = importBlock;
+  let o = `/* Built with Chasket v${__chasketVersion} — https://chasket.dev */\n`;
+  o += importBlock;
   o += `(() => {\n"use strict";\n\n`;
   o += `class ${cn} extends HTMLElement {\n`;
+  // adoptedStyleSheets for CSP-safe styling (both Shadow DOM and shadow: none)
+  // Uses CSSStyleSheet constructor when available, falls back to <style> tag
+  const hasStyle = !!c.style;
+  const cssStr = hasStyle ? (us ? minCss(c.style) : minCss(scopeCss(c.style, tn))) : '';
+  if (hasStyle) {
+    // Escape for safe embedding in template literal AND HTML <style> context:
+    // 1. Backslashes, backticks, ${} for template literal safety
+    // 2. </style> and </script> to prevent HTML context breakout (XSS)
+    const safeCss = cssStr
+      .replace(/\\/g, '\\\\')
+      .replace(/`/g, '\\`')
+      .replace(/\$\{/g, '\\${')
+      .replace(/<\/(style|script)/gi, '<\\/$1');
+    o += `  static #__css = \`${safeCss}\`;\n`;
+    o += `  static #__sheet = (() => { try { const s = new CSSStyleSheet(); s.replaceSync(${cn}.#__css); return s; } catch(e) { return null; } })();\n`;
+    if (!us) {
+      // shadow: none: track how many instances are using the document-level sheet
+      o += `  static #__sheetRefCount = 0;\n`;
+    }
+    o += `\n`;
+  }
   // Form-associated custom element support
   if (fa) {
     o += `  static formAssociated = true;\n`;
@@ -2823,9 +2849,19 @@ function generate(c, options) {
   for(const d of c.script)if(d.kind==='ref')o+=`  #${d.name}${ts?': '+typeToTs(d.type)+' | null':''} = null;\n`;
   // microtask デバウンス用フラグ
   o+=`  #updateScheduled${ts?' : boolean':''} = false;\n`;
-  if(us)o+=`  #shadow${ts?': ShadowRoot':''};\n`;o+=`  #listeners${ts?': [Element, string, EventListener][]':''} = [];\n\n`;
+  if(us)o+=`  #shadow${ts?': ShadowRoot':''};\n`;
+  if(!us && hasStyle) o+=`  #__sheetAttached${ts?' : boolean':''} = false;\n`;
+  o+=`  #listeners${ts?': [Element, string, EventListener][]':''} = [];\n\n`;
   if(pv.length){o+=`  static get observedAttributes() {\n    return [${pv.map(p=>`'${camelToKebab(p)}'`).join(', ')}];\n  }\n\n`;}
-  o+=`  constructor() {\n    super();\n`;if(us)o+=`    this.#shadow = this.attachShadow({ mode: '${sh}' });\n`;if(fa)o+=`    this.#internals = this.attachInternals();\n`;o+=`  }\n\n`;
+  o+=`  constructor() {\n    super();\n`;
+  if(us) {
+    o+=`    this.#shadow = this.attachShadow({ mode: '${sh}' });\n`;
+    if (hasStyle) {
+      o+=`    if (${cn}.#__sheet) this.#shadow.adoptedStyleSheets = [${cn}.#__sheet];\n`;
+    }
+  }
+  if(fa)o+=`    this.#internals = this.attachInternals();\n`;
+  o+=`  }\n\n`;
   // Error boundary: check if component has on error handler
   const hasErrorHandler = c.script.some(d => d.kind==='lifecycle' && d.event==='error');
   o+=`  connectedCallback() {\n`;
@@ -2833,6 +2869,15 @@ function generate(c, options) {
   // shadow: none mode: add scoping attribute for CSS isolation
   if (!us) {
     o+=`    this.setAttribute('data-chasket-scope', '${tn}');\n`;
+    if (hasStyle) {
+      // Adopt stylesheet into document (ref-counted, idempotent per instance)
+      o+=`    if (${cn}.#__sheet && !this.#__sheetAttached) {\n`;
+      o+=`      this.#__sheetAttached = true;\n`;
+      o+=`      if (${cn}.#__sheetRefCount++ === 0) {\n`;
+      o+=`        document.adoptedStyleSheets = [...document.adoptedStyleSheets, ${cn}.#__sheet];\n`;
+      o+=`      }\n`;
+      o+=`    }\n`;
+    }
   }
   // Read initial prop values from HTML attributes
   for(const d of c.script) {
@@ -2884,7 +2929,17 @@ function generate(c, options) {
       o+=`    }\n`;
     }
   }
-  for(const d of c.script)if(d.kind==='lifecycle'&&d.event==='unmount')o+=`    ${txBody(d.body).split('\n').join('\n    ')}\n`;o+=`  }\n\n`;
+  for(const d of c.script)if(d.kind==='lifecycle'&&d.event==='unmount')o+=`    ${txBody(d.body).split('\n').join('\n    ')}\n`;
+  // shadow: none: remove adopted stylesheet from document when last instance disconnects (idempotent)
+  if (!us && hasStyle) {
+    o+=`    if (${cn}.#__sheet && this.#__sheetAttached) {\n`;
+    o+=`      this.#__sheetAttached = false;\n`;
+    o+=`      if (--${cn}.#__sheetRefCount === 0) {\n`;
+    o+=`        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(s => s !== ${cn}.#__sheet);\n`;
+    o+=`      }\n`;
+    o+=`    }\n`;
+  }
+  o+=`  }\n\n`;
   // Provide: notify consumers when value changes
   for(const d of c.script) {
     if(d.kind==='provide') {
@@ -2986,11 +3041,13 @@ function generate(c, options) {
   o+=`  #render() {\n`;
   o+=`    const tpl = document.createElement('template');\n`;
   o+=`    tpl.innerHTML = \`\n`;
-  if(c.style) {
+  if(hasStyle) {
     if (us) {
-      o+=`      <style>${minCss(c.style)}</style>\n`;
+      // Shadow DOM: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      o+=`      <style>${minCss(scopeCss(c.style, tn))}</style>\n`;
+      // shadow: none: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     }
   }
   o+=templateStr;
@@ -3002,11 +3059,12 @@ function generate(c, options) {
   o+=`  #getNewTree() {\n`;
   o+=`    const tpl = document.createElement('template');\n`;
   o+=`    tpl.innerHTML = \`\n`;
-  if(c.style) {
+  if(hasStyle) {
     if (us) {
-      o+=`      <style>${minCss(c.style)}</style>\n`;
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      o+=`      <style>${minCss(scopeCss(c.style, tn))}</style>\n`;
+      // shadow: none: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     }
   }
   o+=templateStr;
@@ -3686,7 +3744,7 @@ function renderToString(source, fileName, props = {}, options = {}) {
 
   if (useShadow) {
     html += `<template shadowrootmode="${meta.shadow || 'open'}">`;
-    if (minifiedCss) html += `<style>${minifiedCss}</style>`;
+    if (minifiedCss) html += `<style>${minifiedCss.replace(/<\/(style|script)/gi, '<\\/$1')}</style>`;
     html += templateHtml;
     html += '</template>';
   } else {

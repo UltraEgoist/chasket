@@ -1,6 +1,6 @@
 {
   "name": "@chasket/vite-plugin-chasket",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Vite plugin for Chasket (.csk) components — compile .csk files to Web Components with HMR support",
   "main": "index.js",
   "module": "index.mjs",

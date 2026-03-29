@@ -1,5 +1,7 @@
 # @chasket/chasket-lsp
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Language Server Protocol implementation for Chasket. Provides diagnostics, completions, hover, go-to-definition, and formatting for `.csk` files in any LSP-compatible editor.
 
 Zero dependencies.

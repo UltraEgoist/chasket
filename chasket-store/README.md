@@ -1,5 +1,7 @@
 # @chasket/chasket-store
 
+> Part of the [Chasket](https://chasket.dev) ecosystem.
+
 Reactive state management for Chasket applications. Flux-based architecture with typed actions, selectors, middleware, and time-travel debugging.
 
 Zero dependencies.

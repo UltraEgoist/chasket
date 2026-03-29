@@ -1,5 +1,7 @@
 # Chasket 🔥
 
+**[Documentation & Guide](https://chasket.dev)**
+
 A template-first language that compiles to native Web Components.
 
 Write `.csk` files with a simple, declarative syntax — get zero-runtime Custom Elements with Shadow DOM, scoped CSS, reactivity, and type checking out of the box.
