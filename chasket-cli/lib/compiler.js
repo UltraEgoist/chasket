@@ -700,9 +700,9 @@ function parseScript(content, startLine) {
     }
 
     // ─── Watch declarations ───
-    // Format: watch(dep1, dep2, dep3) { ... }
+    // Format: watch(dep1, dep2, dep3) { ... }  or  watch dep { ... }
     // Triggered when any of the dependencies change
-    if ((m = line.match(/^watch\s*\(([^)]+)\)\s*\{/))) {
+    if ((m = line.match(/^watch\s*\(([^)]+)\)\s*\{/)) || (m = line.match(/^watch\s+(\w+(?:\s*,\s*\w+)*)\s*\{/))) {
       const deps = m[1].split(',').map(d=>d.trim());
       // Multi-line block: collect until braces balance
       let body='', bc=1;
@@ -1711,7 +1711,7 @@ function generate(c, options) {
 
   // ─── Event binding ID generator ───
   let _eid = 0;
-  function nextEid() { return `fl-${_eid++}`; }
+  function nextEid() { return `fl-${tn}-${_eid++}`; }
 
   /**
    * String-aware identifier replacement helper.
@@ -2193,7 +2193,9 @@ function generate(c, options) {
       const body = m[2];
 
       // Handle @media, @keyframes etc. — recurse into the body
-      if (selectorPart.startsWith('@')) {
+      // Strip CSS comments before checking for @ prefix (comments can precede @media)
+      const selectorClean = selectorPart.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+      if (selectorClean.startsWith('@')) {
         return `${selectorPart} { ${scopeCss(body, tagName)} }`;
       }
 
@@ -2801,6 +2803,16 @@ function generate(c, options) {
   let o = importBlock;
   o += `(() => {\n"use strict";\n\n`;
   o += `class ${cn} extends HTMLElement {\n`;
+  // adoptedStyleSheets for CSP-safe styling (Shadow DOM only)
+  // Uses CSSStyleSheet constructor when available, falls back to <style> tag
+  const hasStyle = !!c.style;
+  const cssStr = hasStyle ? (us ? minCss(c.style) : minCss(scopeCss(c.style, tn))) : '';
+  if (hasStyle && us) {
+    // Escape backticks and ${} in CSS for safe embedding in template literal
+    const safeCss = cssStr.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+    o += `  static #__css = \`${safeCss}\`;\n`;
+    o += `  static #__sheet = (() => { try { const s = new CSSStyleSheet(); s.replaceSync(${cn}.#__css); return s; } catch(e) { return null; } })();\n\n`;
+  }
   // Form-associated custom element support
   if (fa) {
     o += `  static formAssociated = true;\n`;
@@ -2825,7 +2837,15 @@ function generate(c, options) {
   o+=`  #updateScheduled${ts?' : boolean':''} = false;\n`;
   if(us)o+=`  #shadow${ts?': ShadowRoot':''};\n`;o+=`  #listeners${ts?': [Element, string, EventListener][]':''} = [];\n\n`;
   if(pv.length){o+=`  static get observedAttributes() {\n    return [${pv.map(p=>`'${camelToKebab(p)}'`).join(', ')}];\n  }\n\n`;}
-  o+=`  constructor() {\n    super();\n`;if(us)o+=`    this.#shadow = this.attachShadow({ mode: '${sh}' });\n`;if(fa)o+=`    this.#internals = this.attachInternals();\n`;o+=`  }\n\n`;
+  o+=`  constructor() {\n    super();\n`;
+  if(us) {
+    o+=`    this.#shadow = this.attachShadow({ mode: '${sh}' });\n`;
+    if (hasStyle) {
+      o+=`    if (${cn}.#__sheet) this.#shadow.adoptedStyleSheets = [${cn}.#__sheet];\n`;
+    }
+  }
+  if(fa)o+=`    this.#internals = this.attachInternals();\n`;
+  o+=`  }\n\n`;
   // Error boundary: check if component has on error handler
   const hasErrorHandler = c.script.some(d => d.kind==='lifecycle' && d.event==='error');
   o+=`  connectedCallback() {\n`;
@@ -2986,11 +3006,13 @@ function generate(c, options) {
   o+=`  #render() {\n`;
   o+=`    const tpl = document.createElement('template');\n`;
   o+=`    tpl.innerHTML = \`\n`;
-  if(c.style) {
+  if(hasStyle) {
     if (us) {
-      o+=`      <style>${minCss(c.style)}</style>\n`;
+      // Shadow DOM: use <style> only as fallback when adoptedStyleSheets is unavailable
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      o+=`      <style>${minCss(scopeCss(c.style, tn))}</style>\n`;
+      // shadow: none: always use <style> tag (scoped via data-chasket-scope)
+      o+=`      <style>${cssStr}</style>\n`;
     }
   }
   o+=templateStr;
@@ -3002,11 +3024,11 @@ function generate(c, options) {
   o+=`  #getNewTree() {\n`;
   o+=`    const tpl = document.createElement('template');\n`;
   o+=`    tpl.innerHTML = \`\n`;
-  if(c.style) {
+  if(hasStyle) {
     if (us) {
-      o+=`      <style>${minCss(c.style)}</style>\n`;
+      o+=`      \${${cn}.#__sheet ? '' : '<style>' + ${cn}.#__css + '</style>'}\n`;
     } else {
-      o+=`      <style>${minCss(scopeCss(c.style, tn))}</style>\n`;
+      o+=`      <style>${cssStr}</style>\n`;
     }
   }
   o+=templateStr;

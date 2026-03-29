@@ -3952,3 +3952,181 @@ computed active: string[] = items.filter(i => i !== "done")
 });
 
 console.log('✓ All multi-line computed tests passed');
+
+// =====================================================================
+// scopeCss: CSS comment before @media should not break scoping
+// =====================================================================
+test('compile - scopeCss: CSS comment before @media does not break scoping', () => {
+  const src = `
+<meta>
+name: x-comment-media
+shadow: none
+</meta>
+<script>
+state count: number = 0
+</script>
+<template><p>{{ count }}</p></template>
+<style>
+.box { color: red; }
+/* Responsive */
+@media (max-width: 768px) {
+  .box { color: blue; }
+}
+</style>`;
+  const r = compile(src, 'x-comment-media.csk');
+  assertSuccess(r);
+  // @media should appear in output and not be prefixed with scope selector
+  assert.ok(r.output.includes('@media'), 'should contain @media rule');
+  assert.ok(!r.output.match(/\[data-chasket-scope[^\]]*\]\s*\/\*.*\*\/\s*@media/),
+    'scope selector should not appear before /* comment */ @media');
+  // scoped .box should exist inside @media
+  assert.ok(r.output.includes('[data-chasket-scope="x-comment-media"] .box'),
+    'should scope .box selector');
+});
+
+// =====================================================================
+// data-chasket-id includes component name to avoid collision
+// =====================================================================
+test('compile - data-chasket-id includes component name for namespace isolation', () => {
+  const src = `
+<meta>
+name: x-id-ns
+</meta>
+<script>
+fn handleClick() { }
+</script>
+<template><button @click="handleClick">Click</button></template>`;
+  const r = compile(src, 'x-id-ns.csk');
+  assertSuccess(r);
+  // data-chasket-id should include the component name
+  assert.ok(r.output.includes('data-chasket-id="fl-x-id-ns-0"'),
+    'data-chasket-id should be namespaced with component name');
+  assert.ok(!r.output.includes('data-chasket-id="fl-0"'),
+    'should not use non-namespaced fl-0 format');
+});
+
+test('compile - different components produce different data-chasket-id namespaces', () => {
+  const src1 = `
+<meta>name: x-parent</meta>
+<script>fn click1() { }</script>
+<template><button @click="click1">A</button></template>`;
+  const src2 = `
+<meta>name: x-child</meta>
+<script>fn click2() { }</script>
+<template><button @click="click2">B</button></template>`;
+  const r1 = compile(src1, 'x-parent.csk');
+  const r2 = compile(src2, 'x-child.csk');
+  assertSuccess(r1);
+  assertSuccess(r2);
+  assert.ok(r1.output.includes('fl-x-parent-0'), 'parent should use fl-x-parent-0');
+  assert.ok(r2.output.includes('fl-x-child-0'), 'child should use fl-x-child-0');
+  // They should NOT have the same ID
+  assert.ok(!r1.output.includes('fl-x-child-'), 'parent should not have child namespace');
+});
+
+// =====================================================================
+// adoptedStyleSheets: Shadow DOM components use CSSStyleSheet
+// =====================================================================
+test('compile - Shadow DOM component generates adoptedStyleSheets support', () => {
+  const src = `
+<meta>
+name: x-adopted
+</meta>
+<script>
+state count: number = 0
+</script>
+<template><p>{{ count }}</p></template>
+<style>p { color: red; }</style>`;
+  const r = compile(src, 'x-adopted.csk');
+  assertSuccess(r);
+  // Should have static #__css and #__sheet fields
+  assert.ok(r.output.includes('static #__css'), 'should have static #__css field');
+  assert.ok(r.output.includes('static #__sheet'), 'should have static #__sheet field');
+  assert.ok(r.output.includes('CSSStyleSheet'), 'should reference CSSStyleSheet constructor');
+  assert.ok(r.output.includes('replaceSync'), 'should call replaceSync with CSS');
+  // Should adopt the sheet in constructor
+  assert.ok(r.output.includes('adoptedStyleSheets'), 'should set adoptedStyleSheets in constructor');
+  // Template should use conditional <style> fallback
+  assert.ok(r.output.includes('#__sheet'), 'should reference #__sheet for conditional rendering');
+});
+
+test('compile - shadow:none component does NOT use adoptedStyleSheets', () => {
+  const src = `
+<meta>
+name: x-no-adopt
+shadow: none
+</meta>
+<script>
+state count: number = 0
+</script>
+<template><p>{{ count }}</p></template>
+<style>p { color: blue; }</style>`;
+  const r = compile(src, 'x-no-adopt.csk');
+  assertSuccess(r);
+  // Should NOT have adoptedStyleSheets (uses <style> with data-chasket-scope)
+  assert.ok(!r.output.includes('adoptedStyleSheets'), 'shadow:none should not use adoptedStyleSheets');
+  assert.ok(!r.output.includes('static #__sheet'), 'shadow:none should not have #__sheet');
+  // Should have inline <style> with scope
+  assert.ok(r.output.includes('<style>'), 'shadow:none should use inline <style>');
+  assert.ok(r.output.includes('data-chasket-scope'), 'should have data-chasket-scope scoping');
+});
+
+test('compile - component without <style> does not generate adoptedStyleSheets', () => {
+  const src = `
+<meta>
+name: x-no-style
+</meta>
+<script>
+state count: number = 0
+</script>
+<template><p>{{ count }}</p></template>`;
+  const r = compile(src, 'x-no-style.csk');
+  assertSuccess(r);
+  assert.ok(!r.output.includes('static #__css'), 'should not have #__css without <style>');
+  assert.ok(!r.output.includes('adoptedStyleSheets'), 'should not have adoptedStyleSheets without <style>');
+});
+
+// =====================================================================
+// watch block: const declarations should NOT be promoted to class fields
+// =====================================================================
+test('compile - watch block const declarations stay local (not promoted to class fields)', () => {
+  const src = `
+<meta>name: x-watch-local</meta>
+<script>
+state activeSection: string = "intro"
+
+watch activeSection {
+  const links = document.querySelectorAll('.toc a')
+  links.forEach((link) => {
+    link.classList.remove('active')
+  })
+}
+</script>
+<template><p>{{ activeSection }}</p></template>`;
+  const r = compile(src, 'x-watch-local.csk');
+  assertSuccess(r);
+  // const links should be inside the watch method, not promoted to a class field
+  assert.ok(r.output.includes('#watch_activeSection'), 'should generate watch method');
+  assert.ok(!r.output.match(/^\s+#links\s*=/m), 'const links should NOT be a class field');
+  // Should contain const links inside the watch method body
+  const watchIdx = r.output.indexOf('#watch_activeSection');
+  const watchBody = r.output.substring(watchIdx, watchIdx + 300);
+  assert.ok(watchBody.includes('const links'), 'const links should be inside watch method body');
+});
+
+test('compile - watch without parentheses syntax parses correctly', () => {
+  const src = `
+<meta>name: x-watch-noparen</meta>
+<script>
+state count: number = 0
+
+watch count {
+  console.log("count changed")
+}
+</script>
+<template><p>{{ count }}</p></template>`;
+  const r = compile(src, 'x-watch-noparen.csk');
+  assertSuccess(r);
+  assert.ok(r.output.includes('#watch_count'), 'should generate watch_count method');
+  assert.ok(r.output.includes('__prev_count'), 'should track previous value for watch dep');
+});
