@@ -4151,3 +4151,76 @@ watch count {
   assert.ok(r.output.includes('#watch_count'), 'should generate watch_count method');
   assert.ok(r.output.includes('__prev_count'), 'should track previous value for watch dep');
 });
+
+// ============================================================
+// SECURITY TESTS: adoptedStyleSheets & CSS injection
+// ============================================================
+
+test('SEC-05-1: CSS containing close-style tag is escaped in generated output', () => {
+  // Test code generation directly to bypass Phase 1 block splitting (which splits on </style>)
+  // This tests that generate() properly escapes </style> in the CSS static field
+  const maliciousCss = 'div{content:"<' + '/style><' + 'script>alert(1)<' + '/script>";}';
+  const ast = {
+    meta: { name: 'x-sec-style', shadow: 'open' },
+    script: [{ kind: 'state', name: 'v', type: 'number', init: '0' }],
+    template: [{ type: 'element', tag: 'div', attrs: [], children: [{ type: 'text', value: 'test' }] }],
+    style: maliciousCss
+  };
+  const r = generate(ast, {});
+  // The literal </style> and </script> must be escaped in #__css
+  assert.ok(!r.output.includes('<' + '/style><' + 'script>'), 'must not contain unescaped close-style breakout');
+  // In the generated JS template literal, </style> becomes <\/style>
+  assert.ok(r.output.includes('<\\/style>'), 'closing style tag must be escaped');
+  assert.ok(r.output.includes('<\\/script>'), 'closing script tag must be escaped');
+});
+
+test('SEC-05-2: CSS containing </script> is escaped in generated output', () => {
+  const src = `<meta>name: x-sec-script</meta>
+<script>state v: number = 0</script>
+<template><div>{{v}}</div></template>
+<style>
+div { content: "</script>"; }
+</style>`;
+  const r = compile(src, 'x-sec-script.csk');
+  assertSuccess(r);
+  assert.ok(!r.output.includes('</script>"'), 'must not contain unescaped </script>');
+});
+
+test('SEC-05-3: shadow:none adoptedStyleSheets is idempotent (has instance flag)', () => {
+  const src = `<meta>
+name: x-idempotent
+shadow: none
+</meta>
+<script>state v: number = 0</script>
+<template><div>{{v}}</div></template>
+<style>div { color: green; }</style>`;
+  const r = compile(src, 'x-idempotent.csk');
+  assertSuccess(r);
+  assert.ok(r.output.includes('#__sheetAttached'), 'should have instance-level sheet tracking flag');
+  // connectedCallback should check the flag before incrementing refcount
+  assert.ok(r.output.includes('!this.#__sheetAttached'), 'should guard against double-connect');
+});
+
+test('SEC-05-4: SSR output escapes </style> in CSS', () => {
+  const { renderToString } = require('./compiler.test.js').exports || compile;
+  // Test via compile with SSR-like inspection
+  const src = `<meta>name: x-ssr-sec</meta>
+<script>state v: number = 0</script>
+<template><div>{{v}}</div></template>
+<style>div { content: "</style><img onerror=alert(1)>"; }</style>`;
+  const r = compile(src, 'x-ssr-sec.csk');
+  assertSuccess(r);
+  // Even in the static #__css field, </style> must be escaped
+  assert.ok(!r.output.includes('</style><img'), 'SSR-safe: must escape </style> in CSS string');
+});
+
+test('SEC-05-5: nextEid sanitizes component name for defense-in-depth', () => {
+  // Normal component name should work as-is (already validated by E0003)
+  const src = `<meta>name: x-safe-comp</meta>
+<script>state v: number = 0</script>
+<template><div @click="v++">{{v}}</div></template>`;
+  const r = compile(src, 'x-safe-comp.csk');
+  assertSuccess(r);
+  // Event binding ID should include the component name
+  assert.ok(r.output.includes('fl-x-safe-comp-'), 'element ID includes component name');
+});

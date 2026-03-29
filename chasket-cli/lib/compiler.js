@@ -1711,8 +1711,9 @@ function generate(c, options) {
   const missingCloseTagElements = [];
 
   // ─── Event binding ID generator ───
+  // Defense-in-depth: sanitize component name in nextEid even though input validation ensures [a-z0-9-]
   let _eid = 0;
-  function nextEid() { return `fl-${tn}-${_eid++}`; }
+  function nextEid() { return `fl-${tn.replace(/[^a-z0-9-]/g, '')}-${_eid++}`; }
 
   /**
    * String-aware identifier replacement helper.
@@ -2810,8 +2811,14 @@ function generate(c, options) {
   const hasStyle = !!c.style;
   const cssStr = hasStyle ? (us ? minCss(c.style) : minCss(scopeCss(c.style, tn))) : '';
   if (hasStyle) {
-    // Escape backticks and ${} in CSS for safe embedding in template literal
-    const safeCss = cssStr.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+    // Escape for safe embedding in template literal AND HTML <style> context:
+    // 1. Backslashes, backticks, ${} for template literal safety
+    // 2. </style> and </script> to prevent HTML context breakout (XSS)
+    const safeCss = cssStr
+      .replace(/\\/g, '\\\\')
+      .replace(/`/g, '\\`')
+      .replace(/\$\{/g, '\\${')
+      .replace(/<\/(style|script)/gi, '<\\/$1');
     o += `  static #__css = \`${safeCss}\`;\n`;
     o += `  static #__sheet = (() => { try { const s = new CSSStyleSheet(); s.replaceSync(${cn}.#__css); return s; } catch(e) { return null; } })();\n`;
     if (!us) {
@@ -2842,7 +2849,9 @@ function generate(c, options) {
   for(const d of c.script)if(d.kind==='ref')o+=`  #${d.name}${ts?': '+typeToTs(d.type)+' | null':''} = null;\n`;
   // microtask デバウンス用フラグ
   o+=`  #updateScheduled${ts?' : boolean':''} = false;\n`;
-  if(us)o+=`  #shadow${ts?': ShadowRoot':''};\n`;o+=`  #listeners${ts?': [Element, string, EventListener][]':''} = [];\n\n`;
+  if(us)o+=`  #shadow${ts?': ShadowRoot':''};\n`;
+  if(!us && hasStyle) o+=`  #__sheetAttached${ts?' : boolean':''} = false;\n`;
+  o+=`  #listeners${ts?': [Element, string, EventListener][]':''} = [];\n\n`;
   if(pv.length){o+=`  static get observedAttributes() {\n    return [${pv.map(p=>`'${camelToKebab(p)}'`).join(', ')}];\n  }\n\n`;}
   o+=`  constructor() {\n    super();\n`;
   if(us) {
@@ -2861,9 +2870,12 @@ function generate(c, options) {
   if (!us) {
     o+=`    this.setAttribute('data-chasket-scope', '${tn}');\n`;
     if (hasStyle) {
-      // Adopt stylesheet into document (ref-counted to handle multiple instances)
-      o+=`    if (${cn}.#__sheet && ${cn}.#__sheetRefCount++ === 0) {\n`;
-      o+=`      document.adoptedStyleSheets = [...document.adoptedStyleSheets, ${cn}.#__sheet];\n`;
+      // Adopt stylesheet into document (ref-counted, idempotent per instance)
+      o+=`    if (${cn}.#__sheet && !this.#__sheetAttached) {\n`;
+      o+=`      this.#__sheetAttached = true;\n`;
+      o+=`      if (${cn}.#__sheetRefCount++ === 0) {\n`;
+      o+=`        document.adoptedStyleSheets = [...document.adoptedStyleSheets, ${cn}.#__sheet];\n`;
+      o+=`      }\n`;
       o+=`    }\n`;
     }
   }
@@ -2918,10 +2930,13 @@ function generate(c, options) {
     }
   }
   for(const d of c.script)if(d.kind==='lifecycle'&&d.event==='unmount')o+=`    ${txBody(d.body).split('\n').join('\n    ')}\n`;
-  // shadow: none: remove adopted stylesheet from document when last instance disconnects
+  // shadow: none: remove adopted stylesheet from document when last instance disconnects (idempotent)
   if (!us && hasStyle) {
-    o+=`    if (${cn}.#__sheet && --${cn}.#__sheetRefCount === 0) {\n`;
-    o+=`      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(s => s !== ${cn}.#__sheet);\n`;
+    o+=`    if (${cn}.#__sheet && this.#__sheetAttached) {\n`;
+    o+=`      this.#__sheetAttached = false;\n`;
+    o+=`      if (--${cn}.#__sheetRefCount === 0) {\n`;
+    o+=`        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(s => s !== ${cn}.#__sheet);\n`;
+    o+=`      }\n`;
     o+=`    }\n`;
   }
   o+=`  }\n\n`;
@@ -3729,7 +3744,7 @@ function renderToString(source, fileName, props = {}, options = {}) {
 
   if (useShadow) {
     html += `<template shadowrootmode="${meta.shadow || 'open'}">`;
-    if (minifiedCss) html += `<style>${minifiedCss}</style>`;
+    if (minifiedCss) html += `<style>${minifiedCss.replace(/<\/(style|script)/gi, '<\\/$1')}</style>`;
     html += templateHtml;
     html += '</template>';
   } else {
