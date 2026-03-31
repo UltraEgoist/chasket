@@ -1,0 +1,5 @@
+{
+  "extension.description": "Chasket language support — syntax highlighting, diagnostics, completions, and hover for .csk Web Component files",
+  "config.enableDiagnostics.description": "Enable real-time type checking and error diagnostics",
+  "config.compilerPath.description": "Path to chasket-cli bin/chasket.js (leave empty to use global chasket command)"
+}

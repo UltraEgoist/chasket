@@ -1,13 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Container/basket shape with angle brackets representing template-first -->
-  <!-- Outer rounded container -->
-  <rect x="4" y="3" width="24" height="20" rx="3" ry="3" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
-  <!-- Left angle bracket < -->
-  <path d="M13 8L8 13L13 18" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Right angle bracket > -->
-  <path d="M19 8L24 13L19 18" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Slash / in the middle -->
-  <line x1="17" y1="7" x2="15" y2="19" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- .csk text -->
-  <text x="16" y="29" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="5" font-weight="600" fill="#cccccc">.csk</text>
+  <defs>
+    <linearGradient id="g" x1="2" y1="3" x2="24" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2EBCB0"/><stop offset="1" stop-color="#FF7170"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="3" width="21" height="25" rx="4" fill="url(#g)" fill-opacity="0.9"/>
+  <rect x="2" y="3" width="21" height="25" rx="4" stroke="url(#g)" stroke-width="1.5"/>
+  <rect x="6" y="12" width="10" height="7" rx="2" stroke="#fff" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="1.5 1.5"/>
+  <line x1="17" y1="20" x2="27" y2="6" stroke="#E8A243" stroke-width="2.8" stroke-linecap="round"/>
+  <text x="12.5" y="31" text-anchor="middle" font-family="SF Mono, Menlo, monospace" font-size="4.5" font-weight="600" fill="#cccccc">.csk</text>
 </svg>

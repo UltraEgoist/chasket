@@ -1,9 +1,9 @@
 {
   "name": "chasket-lang",
   "displayName": "Chasket",
-  "description": "Chasket言語サポート - シンタックスハイライト、型チェック、エラー表示",
-  "version": "0.1.0",
-  "publisher": "aspect",
+  "description": "%extension.description%",
+  "version": "0.2.2",
+  "publisher": "chasket",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -15,9 +15,16 @@
     "chasket",
     "web components",
     "custom elements",
-    "template"
+    "template",
+    "compiler",
+    "shadow dom"
   ],
   "icon": "icons/chasket-icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UltraEgoist/chasket"
+  },
   "main": "./extension.js",
   "activationEvents": [
     "onLanguage:chasket"
@@ -48,7 +55,7 @@
         "embeddedLanguages": {
           "source.css": "css",
           "text.html.basic": "html",
-          "source.csk.script": "javascript",
+          "source.js": "javascript",
           "meta.block.template.csk": "html",
           "meta.block.style.csk": "css"
         }
@@ -60,12 +67,12 @@
         "chasket.enableDiagnostics": {
           "type": "boolean",
           "default": true,
-          "description": "リアルタイム型チェックとエラー表示を有効にする"
+          "description": "%config.enableDiagnostics.description%"
         },
         "chasket.compilerPath": {
           "type": "string",
           "default": "",
-          "description": "chasket-cli の bin/chasket.js へのパス（空の場合はグローバルの chasket コマンドを使用）"
+          "description": "%config.compilerPath.description%"
         }
       }
     }

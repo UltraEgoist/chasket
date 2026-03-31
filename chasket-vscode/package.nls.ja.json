@@ -1,0 +1,5 @@
+{
+  "extension.description": "Chasket言語サポート — .cskファイルのシンタックスハイライト、診断、補完、ホバー",
+  "config.enableDiagnostics.description": "リアルタイム型チェックとエラー表示を有効にする",
+  "config.compilerPath.description": "chasket-cli の bin/chasket.js へのパス（空の場合はグローバルの chasket コマンドを使用）"
+}

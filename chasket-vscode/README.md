@@ -38,14 +38,11 @@
 ```bash
 # VS Code 拡張機能フォルダにコピー
 
-# macOS
-cp -r chasket-vscode ~/.vscode/extensions/chasket-lang-0.1.0
-
-# Linux
-cp -r chasket-vscode ~/.vscode/extensions/chasket-lang-0.1.0
+# macOS / Linux
+cp -r chasket-vscode ~/.vscode/extensions/aspect.chasket-lang-0.2.2
 
 # Windows
-xcopy chasket-vscode %USERPROFILE%\.vscode\extensions\chasket-lang-0.1.0\ /E /I
+xcopy chasket-vscode %USERPROFILE%\.vscode\extensions\aspect.chasket-lang-0.2.2\ /E /I
 ```
 
 VS Code を再起動すると `.csk` ファイルが認識されます。
@@ -61,7 +58,7 @@ cd chasket-vscode
 vsce package
 
 # インストール
-code --install-extension chasket-lang-0.1.0.vsix
+code --install-extension chasket-lang-0.2.2.vsix
 ```
 
 ## 設定

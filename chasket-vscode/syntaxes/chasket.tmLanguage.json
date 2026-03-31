@@ -43,8 +43,11 @@
       "end": "(</)(script)(>)",
       "endCaptures": { "1": {"name":"punctuation.definition.tag.begin.csk"}, "2": {"name":"entity.name.tag.block.csk"}, "3": {"name":"punctuation.definition.tag.end.csk"} },
       "name": "meta.block.script.csk",
-      "contentName": "source.csk.script",
-      "patterns": [ { "include": "#script-content" } ]
+      "contentName": "source.js",
+      "patterns": [
+        { "include": "#script-content" },
+        { "include": "source.js" }
+      ]
     },
     "script-content": {
       "patterns": [
@@ -60,7 +63,7 @@
         { "match": "\\b(fn)\\s+(async\\s+)?(\\w+)", "captures": { "1": {"name":"keyword.function.csk"}, "2": {"name":"storage.modifier.async.csk"}, "3": {"name":"entity.name.function.csk"} } },
         { "match": "\\b(fn)\\b", "name": "keyword.function.csk" },
         { "match": "\\b(watch|provide|consume)\\b", "name": "keyword.control.csk" },
-        { "match": "\\b(on)\\s+(mount|unmount|adopt|update|formAssociated|formDisabled|formReset|formStateRestore)\\b", "captures": { "1": {"name":"keyword.control.csk"}, "2": {"name":"entity.name.function.lifecycle.csk"} } },
+        { "match": "\\b(on)\\s+(mount|unmount|adopt|update|error|formAssociated|formDisabled|formReset|formStateRestore)\\b", "captures": { "1": {"name":"keyword.control.csk"}, "2": {"name":"entity.name.function.lifecycle.csk"} } },
         { "match": "\\b(type)\\s+(\\w+)\\s*=", "captures": { "1": {"name":"keyword.declaration.type.csk"}, "2": {"name":"entity.name.type.csk"} } },
         { "match": "\\b(import)\\s+(['\"])(.+?)\\2\\s*$", "captures": { "1": {"name":"keyword.control.import.csk"}, "3": {"name":"string.quoted.module.csk"} } },
         { "match": "\\b(import)\\s+(.+?)\\s+(from)\\s+(['\"])(.+?)\\4", "captures": { "1": {"name":"keyword.control.import.csk"}, "2": {"name":"variable.other.readwrite.csk"}, "3": {"name":"keyword.control.from.csk"}, "5": {"name":"string.quoted.module.csk"} } },
@@ -153,19 +156,40 @@
       ]
     },
     "html-open-tag": {
-      "begin": "(<)([a-zA-Z][\\w-]*)",
-      "beginCaptures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.html"} },
-      "end": "(/?>)",
-      "endCaptures": { "1": {"name":"punctuation.definition.tag.end.html"} },
-      "patterns": [ { "include": "#tag-attrs" } ]
+      "patterns": [
+        {
+          "comment": "Custom element tag (contains hyphen — Web Component)",
+          "begin": "(<)([a-zA-Z][\\w]*-[\\w-]*)",
+          "beginCaptures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.component.csk"} },
+          "end": "(/?>)",
+          "endCaptures": { "1": {"name":"punctuation.definition.tag.end.html"} },
+          "patterns": [ { "include": "#tag-attrs" } ]
+        },
+        {
+          "comment": "Standard HTML tag",
+          "begin": "(<)([a-zA-Z][\\w]*)",
+          "beginCaptures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.html"} },
+          "end": "(/?>)",
+          "endCaptures": { "1": {"name":"punctuation.definition.tag.end.html"} },
+          "patterns": [ { "include": "#tag-attrs" } ]
+        }
+      ]
     },
     "html-close-tag": {
-      "match": "(</)(\\w[\\w-]*)(>)",
-      "captures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.html"}, "3": {"name":"punctuation.definition.tag.end.html"} }
+      "patterns": [
+        {
+          "match": "(</)(\\w+[\\w]*-[\\w-]*)(>)",
+          "captures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.component.csk"}, "3": {"name":"punctuation.definition.tag.end.html"} }
+        },
+        {
+          "match": "(</)(\\w[\\w-]*)(>)",
+          "captures": { "1": {"name":"punctuation.definition.tag.begin.html"}, "2": {"name":"entity.name.tag.html"}, "3": {"name":"punctuation.definition.tag.end.html"} }
+        }
+      ]
     },
     "tag-attrs": {
       "patterns": [
-        { "match": "(@)(click|dblclick|mousedown|mouseup|mousemove|mouseover|mouseout|mouseenter|mouseleave|keydown|keyup|keypress|input|change|submit|reset|focus|blur|focusin|focusout|scroll|resize|wheel|contextmenu|drag|dragstart|dragend|dragover|dragenter|dragleave|drop|touchstart|touchend|touchmove|touchcancel|pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|load|error|abort|select|copy|cut|paste|toggle|close|cancel|invalid|slotchange|animationstart|animationend|animationiteration|transitionend)((?:\\|\\w+)*)", "captures": { "1": {"name":"keyword.operator.event.csk"}, "2": {"name":"entity.other.attribute-name.event.csk"}, "3": {"name":"entity.other.attribute-name.modifier.csk"} } },
+        { "match": "(@)(click|dblclick|mousedown|mouseup|mousemove|mouseover|mouseout|mouseenter|mouseleave|keydown|keyup|keypress|input|change|submit|reset|focus|blur|focusin|focusout|scroll|resize|wheel|contextmenu|drag|dragstart|dragend|dragover|dragenter|dragleave|drop|touchstart|touchend|touchmove|touchcancel|pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|load|error|abort|select|copy|cut|paste|toggle|close|cancel|invalid|slotchange|compositionstart|compositionupdate|compositionend|beforeinput|animationstart|animationend|animationiteration|transitionend|transitionstart|transitionrun)((?:\\|\\w+)*)", "captures": { "1": {"name":"keyword.operator.event.csk"}, "2": {"name":"entity.other.attribute-name.event.csk"}, "3": {"name":"entity.other.attribute-name.modifier.csk"} } },
         { "match": "(:bind)", "name": "keyword.operator.binding.csk" },
         { "match": "(:\\.\\.\\.)", "name": "keyword.operator.spread.csk" },
         { "match": "(:)([a-zA-Z][\\w-]*)", "captures": { "1": {"name":"keyword.operator.binding.csk"}, "2": {"name":"entity.other.attribute-name.binding.csk"} } },
@@ -174,6 +198,15 @@
         { "match": "\\b([a-zA-Z][\\w-]*)(?=\\s*=)", "name": "entity.other.attribute-name.html" },
         { "match": "\\b(class|id|style|type|name|value|placeholder|src|alt|href|target|rel|width|height|disabled|checked|hidden|readonly|required|autofocus|tabindex|title|role|slot)(?=\\s|/?>)", "name": "entity.other.attribute-name.html" },
         { "match": "=", "name": "punctuation.separator.key-value.html" },
+        {
+          "comment": "Attribute value after event/binding — highlight as expression",
+          "begin": "(?<=[@:][-\\w]+(?:\\|\\w+)*=)\"",
+          "end": "\"",
+          "name": "meta.attribute-value.expression.csk",
+          "beginCaptures": { "0": {"name":"punctuation.definition.string.begin.html"} },
+          "endCaptures": { "0": {"name":"punctuation.definition.string.end.html"} },
+          "patterns": [ { "include": "#script-content" } ]
+        },
         { "begin": "\"", "end": "\"", "name": "string.quoted.double.html" },
         { "begin": "'", "end": "'", "name": "string.quoted.single.html" }
       ]

@@ -17,6 +17,7 @@ chasket-compiler-rust/target/
 
 # Internal documentation (security audit details, progress tracking)
 docs/internal/
+chasket-internal/
 
 # Test artifacts
 examples/src/components/security-test.csk
