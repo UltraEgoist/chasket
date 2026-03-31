@@ -382,6 +382,101 @@ Chasket コンパイラはコンパイル時の型チェックを行います。
 
 ---
 
+## ES Module Output (v0.3.0)
+
+コンポーネントの `<script>` ブロックに `import` 文が含まれる場合、コンパイラは自動的に ES Module 形式で出力します。
+
+### 出力モードの自動判定
+
+| 条件 | 出力形式 | `<script>` タグ |
+|------|---------|----------------|
+| `import` なし、`target: 'js'` | IIFE ラッパー付き | `<script src="...">` |
+| `import` あり | ES Module（IIFE なし） | `<script type="module" src="...">` |
+| `target: 'ts'` | ES Module + 型注釈 + export | `<script type="module" src="...">` |
+
+### ES Module 出力の特徴
+
+- IIFE ラッパー `(() => { ... })()` を省略
+- `import` の `.ts` / `.tsx` 拡張子は自動的に `.js` に書き換え
+- ES Module は仕様上 strict mode なので `"use strict"` も省略
+- `target: 'ts'` の場合、`export default` と `export {}` を付与
+
+### バンドル時の import 処理
+
+バンドル生成時、各コンポーネントの `import` は以下のように処理されます。
+
+- バンドル内の他コンポーネントへの import → 自動除去（バンドル内で自己完結）
+- 外部ファイルへの import → バンドルファイル位置からの相対パスに自動書き換え
+- import 文はバンドル先頭に巻き上げ・重複除去
+- bare specifier（npm パッケージ名）はそのまま通過
+
+### 対応する import 形式
+
+```javascript
+// デフォルト import
+import ReactiveNode from '../lib/reactive';
+
+// 名前付き import
+import { formatDate, parseJSON } from '../lib/utils';
+
+// デフォルト + 名前付き
+import ReactiveNode, { Signal } from '../lib/reactive';
+
+// 名前空間 import
+import * as Utils from '../lib/utils';
+
+// 副作用 import
+import '../lib/polyfill';
+
+// 型のみ import（--target ts のとき出力、JS では除去）
+import type { NodeType } from '../lib/types';
+```
+
+### パス解決ルール
+
+- 相対パス（`./` / `../`）のみ解決・書き換え
+- `.ts` / `.tsx` 拡張子は自動的に `.js` に変換
+- 拡張子なしの場合は `.js` が付与
+- bare specifier（`'react'` 等）はそのまま通過
+
+---
+
+## TypeScript トランスパイル (v0.3.0)
+
+`src/` 内の `.ts` ファイル（`components/` 配下・`.d.ts` を除く）はビルド時に自動的に型注釈を除去して `dist/` に `.js` として出力されます。
+
+### 対応する型除去
+
+- 型注釈（`x: string`、`: ReturnType<T>`）
+- `interface` / `type` 宣言
+- `enum` 宣言
+- ジェネリクス（`<T>`、`Set<Type>()`、アロー関数 `<T>() =>`）
+- `as` キャスト / 非 null アサーション（`!`）
+- `public` / `private` / `protected` / `readonly`
+- TypeScript の `this` パラメータ
+- `import type` / `export type`
+- 型のみのクラスフィールド宣言
+
+### dev サーバーでの TypeScript
+
+`chasket dev` 実行時、`.ts` ファイルはオンザフライでトランスパイルされます。ブラウザが `.js` をリクエストし、対応する `.js` が存在しない場合、同名の `.ts` を探して型除去した JavaScript を返します。
+
+---
+
+## セキュリティ
+
+### import パスのバリデーション
+
+- ソースルート外への `../` パストラバーサルを防止
+- bare specifier（npm パッケージ名）は改変しない
+- プロジェクト内ファイルのみアクセス可能（`allowedRoots` チェック）
+
+### ReDoS 対策
+
+`stripTypes` の正規表現にはすべて量指定子上限（`{0,200}`）を設定し、悪意ある入力によるバックトラッキング攻撃を防止しています。
+
+---
+
 ## CLI Commands
 
 ```bash
