@@ -1,6 +1,6 @@
 {
   "name": "@chasket/chasket",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Chasket - Template-first Web Component compiler. Compiles .csk template files into JavaScript Web Components.",
   "main": "lib/compiler.js",
   "types": "index.d.ts",

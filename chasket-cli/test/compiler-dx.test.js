@@ -1,5 +1,5 @@
 /**
- * Chasket v0.2.2 DX Test Suite
+ * Chasket v0.3.0 DX Test Suite
  * 6 categories of tests to improve bug detection and developer experience
  */
 const { compile } = require('../lib/compiler.js');

@@ -381,7 +381,7 @@ function cmdInit() {
 <body>
   <x-app></x-app>
   <!-- Chasket: 全コンポーネントが1つにバンドルされます -->
-  <script src="dist/chasket-bundle.js"><\/script>
+  <script type="module" src="dist/chasket-bundle.js"><\/script>
 </body>
 </html>
 `;
@@ -463,14 +463,18 @@ function cmdBuild() {
   }
 
   // ─── TypeScript file transpilation ───
-  const srcBase = path.resolve(config.src || args[1] || 'src');
-  const srcParent = entries.length === 1 ? path.dirname(path.resolve(entries[0].src)) : srcBase;
+  // config.src を基準に .ts ファイルを探索し、同じ相対パスで dist/ に出力
+  // config.src が "src" なら src/lib/reactive.ts → dist/lib/reactive.js
+  // config.src が "src/components" なら親ディレクトリ src/ を基準にする
+  const configSrc = path.resolve(config.src || args[1] || 'src');
+  // components ディレクトリが指定されていた場合は親を使う（lib/ 等の兄弟ディレクトリも含めるため）
+  const tsSrcDir = path.basename(configSrc) === 'components' ? path.dirname(configSrc) : configSrc;
   const tsOutDir = entries.length === 1 ? path.resolve(entries[0].outdir || 'dist') : path.resolve(config.outdir || 'dist');
-  const tsFiles = collectTsFiles(srcParent);
+  const tsFiles = collectTsFiles(tsSrcDir);
   if (tsFiles.length > 0) {
     console.log(`\n${c.info('▸')} Transpiling ${tsFiles.length} TypeScript file(s)...`);
     for (const tsFile of tsFiles) {
-      const relPath = path.relative(srcParent, tsFile);
+      const relPath = path.relative(tsSrcDir, tsFile);
       const outPath = path.join(tsOutDir, relPath.replace(/\.tsx?$/, '.js'));
       const outDirForFile = path.dirname(outPath);
       fs.mkdirSync(outDirForFile, { recursive: true });
@@ -503,7 +507,10 @@ function buildEntry(srcDir, outDir, bundleName, target, optimize, config) {
     return { success: 0, fail: 1 };
   }
 
-  const componentsDir = path.join(outDir, 'components');
+  // srcDir が components ディレクトリ自体を指す場合は dist/components/ に出力
+  // srcDir がそれ以外（例: src/）の場合はディレクトリ構造をそのまま dist/ に出力
+  const srcDirBaseName = path.basename(srcDir);
+  const componentsDir = srcDirBaseName === 'components' ? path.join(outDir, 'components') : outDir;
   fs.mkdirSync(outDir, { recursive: true });
   fs.mkdirSync(componentsDir, { recursive: true });
 
@@ -591,8 +598,49 @@ function buildEntry(srcDir, outDir, bundleName, target, optimize, config) {
       console.log(`  ${c.ok('✓')} → components/${outName} (${size} KB)`);
 
       // Bundle に追加するため、コンパイル済みソースコードを蓄積
+      // バンドルは常に JS で出力（ブラウザで直接実行するため）
+      // target が 'ts' の場合は JS ターゲットで再コンパイルしてバンドルに使用
+      let bundleOutput = result.output;
+      if (target === 'ts') {
+        const jsResult = compile(source, fileName, { target: 'js', optimize, componentRegistry, shadow: config.shadow });
+        if (jsResult.success) bundleOutput = jsResult.output;
+      }
       // （コメント区切り付き、sourceMappingURL除去）
-      const bundleCode = result.output.replace(/\n\/\/# sourceMappingURL=.*$/, '');
+      // import パスを、元のソースファイル位置からバンドル出力位置（outDir）への相対パスに変換
+      let bundleCode = bundleOutput.replace(/\n\/\/# sourceMappingURL=.*$/, '');
+      // import パスを、ソースツリー内の位置から出力ツリー（dist/）内の対応する位置に変換
+      // 例: ../lib/reactive (src/components/ から見た src/lib/reactive) → ./lib/reactive.js (dist/ から見た dist/lib/reactive.js)
+      const sourceFileDir = path.dirname(file);  // .csk ファイルのディレクトリ
+      // ソースツリーのルートディレクトリ（lib/ 等の兄弟ディレクトリを含むレベル）
+      const srcRoot = path.basename(srcDir) === 'components' ? path.dirname(srcDir) : srcDir;
+      bundleCode = bundleCode.replace(
+        /^(import\s+(?:.*?\s+from\s+)?['"])([^'"]+)(['"];?\s*)$/gm,
+        (match, pre, importPath, post) => {
+          // bare specifier (npm パッケージ等) や URL はそのまま通す
+          if (!importPath.startsWith('.') && !importPath.startsWith('/')) {
+            return match;
+          }
+          // 1. ソースファイルの位置から import 先の絶対パスを解決
+          const absTarget = path.resolve(sourceFileDir, importPath);
+          // セキュリティ: ソースルート外へのパストラバーサルを防止
+          const resolvedSrcRoot = path.resolve(srcRoot);
+          if (!absTarget.startsWith(resolvedSrcRoot + path.sep) && absTarget !== resolvedSrcRoot) {
+            return match;  // プロジェクト外の import はそのまま通す
+          }
+          // 2. ソースルートからの相対パスを取得 (例: lib/reactive)
+          const relFromSrc = path.relative(resolvedSrcRoot, absTarget);
+          // 3. 出力ディレクトリからの相対パスに変換 (例: ./lib/reactive.js)
+          let newRel = relFromSrc.split(path.sep).join('/');
+          if (!newRel.startsWith('.')) newRel = './' + newRel;
+          // .ts → .js 拡張子書き換え
+          if (newRel.endsWith('.ts')) newRel = newRel.slice(0, -3) + '.js';
+          else if (newRel.endsWith('.tsx')) newRel = newRel.slice(0, -4) + '.js';
+          // 拡張子がない場合（クエリ文字列等を除く）は .js を付与
+          const pathWithoutQuery = newRel.split('?')[0];
+          if (!path.extname(pathWithoutQuery)) newRel = pathWithoutQuery + '.js' + (newRel.includes('?') ? '?' + newRel.split('?')[1] : '');
+          return pre + newRel + post;
+        }
+      );
       bundleParts.push(`// ── ${fileName} ──\n${bundleCode}`);
 
       // NEW-OPT: Collect all used helpers across components for shared extraction
@@ -750,7 +798,7 @@ function collectTsFiles(dir) {
       // Skip the components directory (handled by Chasket compiler)
       if (entry.name === 'components') continue;
       results.push(...collectTsFiles(fullPath));
-    } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) {
+    } else if ((entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) && !entry.name.endsWith('.d.ts')) {
       results.push(fullPath);
     }
   }
@@ -817,18 +865,35 @@ function stripTypes(code) {
 
     // Strip inline type annotations from the line
     let processed = line;
-    // Remove type assertions: expr as Type
-    processed = processed.replace(/\s+as\s+\w[\w<>\[\],\s|&]*(?=[,;\)\]\}]|$)/g, '');
+    // Remove access modifiers: public/private/protected/readonly on class fields/params
+    processed = processed.replace(/\b(public|private|protected)\s+(readonly\s+)?/g, '$2');
+    processed = processed.replace(/\breadonly\s+/g, '');
+    // Remove class field type-only declarations: "  fieldName: Type;" → skip entirely
+    // ReDoS 対策: 量指定子に上限 {0,200} を設定
+    if (processed.match(/^\s+\w+\s*:\s*[\w<>\[\],\s|&?{}]{1,200}\s*;?\s*$/) && !processed.includes('=') && !processed.includes('(')) {
+      continue;
+    }
+    // Remove type assertions: expr as Type (ReDoS 対策: 上限付き)
+    processed = processed.replace(/\s+as\s+\w[\w<>\[\],\s|&]{0,200}(?=[,;\)\]\}]|$)/g, '');
     // Remove non-null assertions: expr!.prop -> expr.prop
     processed = processed.replace(/!(\.|[)\]])/g, '$1');
     // Remove function return type: ): Type { -> ) {
-    processed = processed.replace(/\)\s*:\s*[\w<>\[\],\s|&?{}]+\s*(?=\{|=>)/g, ') ');
+    processed = processed.replace(/\)\s*:\s*[\w<>\[\],\s|&?{}]{1,200}\s*(?=\{|=>)/g, ') ');
     // Remove parameter types: (name: Type) -> (name)
-    processed = processed.replace(/(\w+)\s*:\s*[\w<>\[\],\s|&?{}]+(?=[,\)])/g, '$1');
+    processed = processed.replace(/(\w+)\s*:\s*[\w<>\[\],\s|&?{}]{1,200}(?=[,\)])/g, '$1');
     // Remove variable type annotations: const x: Type = -> const x =
-    processed = processed.replace(/((?:const|let|var)\s+\w+)\s*:\s*[\w<>\[\],\s|&?{}]+\s*=/g, '$1 =');
+    processed = processed.replace(/((?:const|let|var)\s+\w+)\s*:\s*[\w<>\[\],\s|&?{}]{1,200}\s*=/g, '$1 =');
     // Remove generic type parameters from function/class declarations
     processed = processed.replace(/((?:function|class)\s+\w+)<[^>]+>/g, '$1');
+    // Remove generic type parameters from anonymous functions: function <T>( → function (
+    processed = processed.replace(/\bfunction\s*<[^>]+>\s*\(/g, 'function (');
+    // Remove generic type parameters from arrow functions: = <T>() => → = () =>
+    processed = processed.replace(/(=\s*)<[^>]+>\s*\(/g, '$1(');
+    // Remove generic type arguments from expressions: new Set<Type>(), Array<Type>
+    processed = processed.replace(/<[\w\s,|&?[\]]+>(?=\()/g, '');
+    // Remove TypeScript 'this' parameter: function(this: Type, x) → function(x), function(this) → function()
+    processed = processed.replace(/\(\s*this\s*,\s*/g, '(');
+    processed = processed.replace(/\(\s*this\s*\)/g, '()');
     // Strip import { type X, Y } -> import { Y }
     processed = processed.replace(/,\s*type\s+\w+/g, '');
     processed = processed.replace(/type\s+\w+\s*,\s*/g, '');
@@ -1373,6 +1438,40 @@ function cmdDev() {
       }
     }
 
+    // .js がどの候補にもマッチしない場合、対応する .ts ファイルを探して
+    // 型注釈を除去した JS として配信する（開発モード用オンザフライ変換）
+    if (url.endsWith('.js')) {
+      const tsUrl = url.slice(0, -3) + '.ts';
+      const tsCandidates = [
+        path.join(htmlDir, tsUrl),
+        path.join(outDir, tsUrl.replace(/^\/dist\//, '')),
+        path.join(process.cwd(), tsUrl),
+      ];
+      if (tsUrl.startsWith('/dist/')) {
+        tsCandidates.unshift(path.join(outDir, tsUrl.replace('/dist/', '')));
+      }
+      for (const tsPath of tsCandidates) {
+        const tsResolved = path.resolve(tsPath);
+        if (!allowedRoots.some(root => tsResolved.startsWith(root + path.sep) || tsResolved === root)) continue;
+        if (fs.existsSync(tsResolved) && fs.statSync(tsResolved).isFile()) {
+          try {
+            const tsContent = fs.readFileSync(tsResolved, 'utf-8');
+            const jsContent = stripTypes(tsContent);
+            res.writeHead(200, {
+              'Content-Type': 'text/javascript; charset=utf-8',
+              'Cache-Control': 'no-cache',
+              'X-Content-Type-Options': 'nosniff',
+              'Access-Control-Allow-Origin': allowFrames ? '*' : 'http://localhost:' + port,
+            });
+            res.end(jsContent);
+            return;
+          } catch (e) {
+            // トランスパイル失敗 → 404 へフォールスルー
+          }
+        }
+      }
+    }
+
     // どの候補にもマッチしない → 404 Not Found を返却
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404 Not Found');
@@ -1552,9 +1651,10 @@ function recompileFile(filePath, srcDir, outDir, wsClients) {
     return;
   }
 
-  // ファイルをコンパイル
+  // ファイルをコンパイル（config.target を反映）
   const source = fs.readFileSync(filePath, 'utf-8');
-  const result = compile(source, fileName);
+  const devConfig = loadConfig();
+  const result = compile(source, fileName, { target: devConfig.target || 'js', shadow: devConfig.shadow });
 
   if (!result.success) {
     // コンパイルエラー時はフルリロード
@@ -1619,7 +1719,8 @@ function recompileFile(filePath, srcDir, outDir, wsClients) {
 function updateBundle(srcDir, outDir) {
   const config = loadConfig();
   const bundleName = config.bundle || 'chasket-bundle.js';
-  const componentsDir = path.join(outDir, 'components');
+  const srcDirBaseName = path.basename(srcDir);
+  const componentsDir = srcDirBaseName === 'components' ? path.join(outDir, 'components') : outDir;
 
   // components/ から全 .js ファイルを読み込み
   const bundleParts = [];
@@ -1667,7 +1768,10 @@ function updateBundle(srcDir, outDir) {
 function buildAll(srcDir, outDir) {
   const config = loadConfig();
   const bundleName = config.bundle || 'chasket-bundle.js';
-  const componentsDir = path.join(outDir, 'components');
+  // srcDir が components ディレクトリ自体を指す場合は dist/components/ に出力
+  // srcDir がそれ以外（例: src/）の場合はディレクトリ構造をそのまま dist/ に出力
+  const srcDirBaseName = path.basename(srcDir);
+  const componentsDir = srcDirBaseName === 'components' ? path.join(outDir, 'components') : outDir;
   fs.mkdirSync(componentsDir, { recursive: true });
   // ソースから .csk ファイルを探索
   const files = collectChasketFiles(srcDir);
@@ -1678,13 +1782,16 @@ function buildAll(srcDir, outDir) {
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf-8');
     const fileName = path.basename(file);
-    // コンパイラ実行（target 指定なし = デフォルト JS）
-    const result = compile(source, fileName, { shadow: config.shadow });
+    // コンパイラ実行（config.target を反映）
+    const target = config.target || 'js';
+    const result = compile(source, fileName, { target, shadow: config.shadow });
 
     if (result.success) {
-      // 個別ファイルを components/ に出力
-      const outName = fileName.replace('.csk', '.js');
+      // 個別ファイルをディレクトリ構造を維持して出力
+      const relPath = path.relative(srcDir, file);
+      const outName = relPath.replace(/\.csk$/, '.js');
       const outPath = path.join(componentsDir, outName);
+      fs.mkdirSync(path.dirname(outPath), { recursive: true });
       fs.writeFileSync(outPath, result.output);
 
       // ソースマップファイルを出力（.js.map）

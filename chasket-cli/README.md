@@ -68,6 +68,42 @@ interface CompileResult {
 }
 ```
 
+## ES Module & TypeScript Support (v0.3.0)
+
+Components can `import` from external `.ts` / `.js` files. When imports are present, the compiler outputs ES Module format (no IIFE wrapper).
+
+```chasket
+<meta>
+  name: "my-app"
+</meta>
+
+<script>
+  import { createStore } from '../lib/store';
+
+  const store = createStore();
+  state count: number = 0
+</script>
+
+<template>
+  <button @click="increment">{{ count }}</button>
+</template>
+```
+
+TypeScript files in `src/lib/` are automatically transpiled (type-stripped) to `dist/lib/`. The dev server also serves `.ts` as `.js` on the fly.
+
+```bash
+# Build with TypeScript output for individual components
+chasket build --target ts
+```
+
+Load the bundle with `type="module"`:
+
+```html
+<script type="module" src="dist/chasket-bundle.js"></script>
+```
+
+See [docs/module-and-typescript.md](docs/module-and-typescript.md) for the full guide.
+
 ## Example
 
 ```chasket

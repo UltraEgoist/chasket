@@ -2801,10 +2801,17 @@ function generate(c, options) {
     importBlock += '\n';
   }
 
-  // Now generate the class wrapped in IIFE
+  // Now generate the class
+  // If imports are present, output as ES Module (no IIFE needed — modules are strict by default)
+  // Otherwise, wrap in IIFE for backward compatibility with <script> tags
+  const useESM = hasImports || ts;
   let o = `/* Built with Chasket v${__chasketVersion} — https://chasket.dev */\n`;
   o += importBlock;
-  o += `(() => {\n"use strict";\n\n`;
+  if (useESM) {
+    o += `\n`;
+  } else {
+    o += `(() => {\n"use strict";\n\n`;
+  }
   o += `class ${cn} extends HTMLElement {\n`;
   // adoptedStyleSheets for CSP-safe styling (both Shadow DOM and shadow: none)
   // Uses CSSStyleSheet constructor when available, falls back to <style> tag
@@ -3272,10 +3279,14 @@ function generate(c, options) {
   o+=`  customElements.define('${tn}', ${cn});\n`;
   o+=`}\n`;
 
-  // Close IIFE
-  o += `\n})();\n`;
+  // Close IIFE (only when not in ES module mode)
+  if (useESM) {
+    o += `\n`;
+  } else {
+    o += `\n})();\n`;
+  }
 
-  // P1-19: For TypeScript or ES module mode, add export after IIFE
+  // P1-19: For TypeScript or ES module mode, add export
   if(ts) {
     o+=`\nexport default ${cn};\nexport {};\n`;
   }
