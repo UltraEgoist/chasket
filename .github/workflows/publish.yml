@@ -54,3 +54,70 @@ jobs:
         run: cd vite-plugin-chasket && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ── chasket.dev のバージョン情報を自動更新 ──
+  update-site:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout chasket.dev
+        uses: actions/checkout@v4
+        with:
+          repository: UltraEgoist/chasket.dev
+          token: ${{ secrets.SITE_DEPLOY_TOKEN }}
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract version and highlights
+        id: release_info
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          # タグから v プレフィックスを除去 (v0.4.0 → 0.4.0)
+          VERSION="${RELEASE_TAG#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+          # Release 本文から ja/en ハイライトを抽出
+          # フォーマット: ## ja\n内容\n## en\n内容
+          JA=$(echo "$RELEASE_BODY" | sed -n '/^## ja/,/^## /{/^## /!p}' | head -1 | xargs)
+          EN=$(echo "$RELEASE_BODY" | sed -n '/^## en/,/^$/p' | sed '/^## en/d' | head -1 | xargs)
+
+          # フォールバック: ハイライトが空なら Release タイトルを使用
+          if [ -z "$JA" ]; then
+            JA="${{ github.event.release.name }}"
+          fi
+          if [ -z "$EN" ]; then
+            EN="${{ github.event.release.name }}"
+          fi
+
+          echo "highlights_ja=${JA}" >> "$GITHUB_OUTPUT"
+          echo "highlights_en=${EN}" >> "$GITHUB_OUTPUT"
+
+      - name: Update site version files
+        env:
+          VERSION: ${{ steps.release_info.outputs.version }}
+          DATE: ${{ steps.release_info.outputs.date }}
+          HIGHLIGHTS_JA: ${{ steps.release_info.outputs.highlights_ja }}
+          HIGHLIGHTS_EN: ${{ steps.release_info.outputs.highlights_en }}
+        run: node scripts/update-version.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json i18n/en.js i18n/ja.js
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update site version to v${VERSION}
+
+          Triggered by release ${{ github.event.release.tag_name }}
+          https://github.com/UltraEgoist/chasket/releases/tag/${{ github.event.release.tag_name }}"
+          git push
+        env:
+          VERSION: ${{ steps.release_info.outputs.version }}
