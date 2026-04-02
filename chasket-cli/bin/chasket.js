@@ -308,11 +308,20 @@ async function cmdInit() {
     });
   }
 
+  // ── 対話/非対話 判定 ──
+  const isInteractive = process.stdin.isTTY;
+
+  // 非対話環境（CI/テスト）で名前なし → Usage を出して終了
+  let name = args[1];
+  if (!name && !isInteractive) {
+    printHelp();
+    process.exit(1);
+  }
+
   // ── 対話開始 ──
   console.log(`\n  ${c.info('▸')} ${c.b('Chasket')} — ${msg('CLI_INIT_HEADING')}\n`);
 
-  // 1. プロジェクト名（引数があればスキップ）
-  let name = args[1];
+  // 1. プロジェクト名（引数があればスキップ、対話環境ならプロンプト）
   if (!name) {
     name = await askText(msg('CLI_INIT_ASK_NAME'), 'my-chasket-app');
   }
@@ -329,12 +338,17 @@ async function cmdInit() {
     process.exit(1);
   }
 
-  // 2. テンプレート選択
-  const template = await askSelect(msg('CLI_INIT_ASK_TEMPLATE'), [
-    { label: 'minimal',   desc: msg('CLI_INIT_TPL_MINIMAL'), value: 'minimal'  },
-    { label: 'todo-app',  desc: msg('CLI_INIT_TPL_TODO'),    value: 'todo'     },
-    { label: 'spa',       desc: msg('CLI_INIT_TPL_SPA'),     value: 'spa'      },
-  ]);
+  // 2. テンプレート選択（非対話環境ではデフォルト minimal）
+  let template;
+  if (isInteractive) {
+    template = await askSelect(msg('CLI_INIT_ASK_TEMPLATE'), [
+      { label: 'minimal',   desc: msg('CLI_INIT_TPL_MINIMAL'), value: 'minimal'  },
+      { label: 'todo-app',  desc: msg('CLI_INIT_TPL_TODO'),    value: 'todo'     },
+      { label: 'spa',       desc: msg('CLI_INIT_TPL_SPA'),     value: 'spa'      },
+    ]);
+  } else {
+    template = 'minimal';
+  }
 
   console.log();
 
