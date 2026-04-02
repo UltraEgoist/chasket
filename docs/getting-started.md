@@ -1,246 +1,181 @@
-# Chasket Getting Started ガイド
+# Getting Started / はじめに
+
+This guide walks through creating your first Web Component with Chasket and running it in the browser.
 
 このガイドでは、Chasket を使って最初の Web Component を作成し、ブラウザで動かすまでの手順を説明します。
 
 ---
 
-## 前提条件
+## Prerequisites / 前提条件
 
-- **Node.js 18 以上** がインストールされていること
-- ターミナル（コマンドプロンプト / PowerShell / bash）が使えること
+- **Node.js 18+** installed / インストール済み
+- Terminal access / ターミナルが使えること
 
 ```bash
-node --version   # v18.0.0 以上であることを確認
+node --version   # v18.0.0+
 ```
 
 ---
 
-## 1. プロジェクトのセットアップ
+## 1. Create a Project / プロジェクトの作成
 
-### 方法 A: `chasket init` で自動生成（推奨）
+### Recommended: `npm create chasket` (推奨)
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/UltraEgoist/chasket.git
-cd chasket
-
-# 新しいプロジェクトを作成
-node chasket-cli/bin/chasket.js init my-app
-cd my-app
+npm create chasket
 ```
 
-これにより以下の構造が生成されます:
+The interactive setup will ask you to:
+1. Enter a project name
+2. Choose a template: **minimal** (counter), **todo-app**, or **spa**
+
+対話型セットアップで以下を選択します：
+1. プロジェクト名を入力
+2. テンプレートを選択: **minimal**（カウンター）、**todo-app**、**spa**
+
+```bash
+cd my-app
+npm install
+```
+
+### Alternative: `npx` / 別の方法
+
+```bash
+npx @chasket/chasket init my-app
+cd my-app
+npm install
+```
+
+### Generated Structure / 生成される構造
+
+The **minimal** template creates:
 
 ```
 my-app/
 ├── src/
-│   └── my-app.csk      # メインコンポーネント
-├── index.html             # エントリーポイント
-└── chasket.config.json      # 設定ファイル
-```
-
-### 方法 B: 手動セットアップ
-
-```bash
-mkdir my-app && cd my-app
-mkdir src
-```
-
-`chasket.config.json` を作成:
-
-```json
-{
-  "src": "src",
-  "out": "dist",
-  "bundle": "chasket-bundle.js"
-}
+│   ├── app.csk              # Main component / メインコンポーネント
+│   └── lib/
+│       └── utils.ts          # TypeScript utility / ユーティリティ
+├── index.html                # Entry point / エントリーポイント
+├── chasket.config.json       # Config / 設定ファイル
+└── package.json
 ```
 
 ---
 
-## 2. 最初のコンポーネントを作る
+## 2. Run the Dev Server / 開発サーバーを起動
 
-`src/hello-world.csk` を作成してください:
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser. The page auto-reloads when you edit `.csk` files.
+
+ブラウザで `http://localhost:3000` を開きます。`.csk` ファイルを編集するとリアルタイムで更新されます。
+
+---
+
+## 3. Write a Component / コンポーネントを書く
+
+A `.csk` file has 4 blocks:
+
+`.csk` ファイルは 4 つのブロックで構成されます：
+
+| Block | Purpose / 役割 |
+|-------|-----------------|
+| `<meta>` | Component name, Shadow DOM mode / コンポーネント名、Shadow DOM モード |
+| `<script>` | Reactive state, methods, lifecycle / 状態、メソッド、ライフサイクル |
+| `<template>` | HTML template with `{{ }}` bindings / HTML テンプレート |
+| `<style>` | Scoped CSS (Shadow DOM) / スコープ付き CSS |
 
 ```chasket
 <meta>
-name: "hello-world"
-shadow: open
+  name: "hello-world"
+  shadow: open
 </meta>
 
 <script>
-state name: string = "World"
+  state name: string = "World"
 
-fn handleInput(e) {
-  name = e.target.value
-}
+  fn handleInput(e) {
+    name = e.target.value
+  }
 </script>
 
 <template>
   <div class="container">
     <h1>Hello, {{ name }}!</h1>
-    <input
-      :value="name"
-      placeholder="名前を入力..."
-      @input="handleInput"
-    />
+    <input :value="name" @input="handleInput" />
   </div>
 </template>
 
 <style>
-:host {
-  display: block;
-  font-family: system-ui, sans-serif;
-}
-.container {
-  max-width: 400px;
-  margin: 2rem auto;
-  text-align: center;
-}
-h1 {
-  color: #3b82f6;
-  font-size: 2rem;
-}
-input {
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-input:focus {
-  border-color: #3b82f6;
-}
+  :host { display: block; font-family: system-ui, sans-serif; }
+  .container { max-width: 400px; margin: 2rem auto; text-align: center; }
+  h1 { color: #3b82f6; }
+  input { width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; }
+  input:focus { border-color: #3b82f6; outline: none; }
 </style>
 ```
 
-### .csk ファイルの構造
-
-Chasket コンポーネントは 4 つのブロックで構成されます:
-
-| ブロック | 役割 |
-|----------|------|
-| `<meta>` | コンポーネント名、Shadow DOM モードなどの設定 |
-| `<script>` | リアクティブな状態、関数、ライフサイクルを定義 |
-| `<template>` | HTML テンプレート（`{{ }}` で動的バインディング） |
-| `<style>` | Shadow DOM でスコープ化された CSS |
-
 ---
 
-## 3. ビルドして動かす
+## 4. Core Syntax / 基本構文
 
-### 開発モード（HMR 付き）
-
-```bash
-# プロジェクトのルートに戻り開発サーバーを起動
-node ../chasket-cli/bin/chasket.js dev
-```
-
-ブラウザで `http://localhost:3000` を開くと、コンポーネントが表示されます。ファイルを編集するとリアルタイムで更新されます。
-
-### プロダクションビルド
-
-```bash
-node ../chasket-cli/bin/chasket.js build
-```
-
-`dist/` フォルダにコンパイル済みの JavaScript が生成されます:
-
-```
-dist/
-├── chasket-bundle.js       # 全コンポーネント（一括読み込み用）
-└── components/
-    └── hello-world.js    # 個別コンポーネント
-```
-
-### HTML で読み込む
-
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>My Chasket App</title>
-</head>
-<body>
-  <hello-world></hello-world>
-  <script src="dist/chasket-bundle.js"></script>
-</body>
-</html>
-```
-
----
-
-## 4. 基本的な構文を学ぶ
-
-### リアクティブ state
-
-`state` で宣言した変数が変更されると、テンプレートが自動的に再描画されます。
+### Reactive `state` / リアクティブ変数
 
 ```chasket
 <script>
-state count: number = 0
-
-fn increment() {
-  count += 1
-}
+  state count: number = 0
+  fn increment() { count += 1 }
 </script>
-
 <template>
   <p>{{ count }}</p>
   <button @click="increment">+1</button>
 </template>
 ```
 
-### 外部から値を受け取る prop
-
-`prop` は HTML 属性から値を受け取ります。属性が変わると自動で反映されます。
+### External attributes `prop` / 外部属性
 
 ```chasket
 <script>
-prop label: string = "Click me"
-prop variant: string = "primary"
+  prop label: string = "Click me"
+  prop variant: string = "primary"
 </script>
-
 <template>
   <button :class="variant">{{ label }}</button>
 </template>
 ```
 
 ```html
-<!-- 使用例 -->
-<my-button label="送信" variant="primary"></my-button>
+<my-button label="Submit" variant="primary"></my-button>
 ```
 
-### 算出プロパティ computed
-
-`computed` は依存する値から自動計算される読み取り専用のプロパティです。
+### Computed properties / 算出プロパティ
 
 ```chasket
 <script>
-state items: string[] = []
-computed total: number = items.length
-computed isEmpty: boolean = items.length === 0
+  state items: string[] = []
+  computed total: number = items.length
+  computed isEmpty: boolean = items.length === 0
 </script>
 ```
 
-### 条件分岐 `<#if>`
+### Conditionals `<#if>` / 条件分岐
 
 ```chasket
 <template>
   <#if condition="count > 0">
-    <p>{{ count }} 件のアイテム</p>
+    <p>{{ count }} items</p>
   <:else-if condition="loading">
-    <p>読み込み中...</p>
+    <p>Loading...</p>
   <:else>
-    <p>アイテムがありません</p>
+    <p>No items</p>
   </#if>
 </template>
 ```
 
-### ループ `<#for>`
+### Loops `<#for>` / ループ
 
 ```chasket
 <template>
@@ -248,404 +183,175 @@ computed isEmpty: boolean = items.length === 0
     <#for each="item, index" of="items" key="item.id">
       <li>{{ index + 1 }}. {{ item.name }}</li>
     <:empty>
-      <li>リストが空です</li>
+      <li>Empty list</li>
     </#for>
   </ul>
 </template>
 ```
 
-### イベント処理
+### Events / イベント処理
 
 ```chasket
-<script>
-fn handleClick() {
-  console.log("clicked!")
-}
-
-fn handleSubmit() {
-  // フォーム送信処理
-}
-</script>
-
 <template>
-  <button @click="handleClick">クリック</button>
-  <form @submit|prevent="handleSubmit">
-    <!-- |prevent で e.preventDefault() が自動適用 -->
-  </form>
+  <button @click="handleClick">Click</button>
+  <form @submit|prevent="handleSubmit">...</form>
 </template>
 ```
 
-利用可能なイベント修飾子:
-
-| 修飾子 | 効果 |
-|--------|------|
+| Modifier | Effect |
+|----------|--------|
 | `\|prevent` | `event.preventDefault()` |
 | `\|stop` | `event.stopPropagation()` |
-| `\|once` | 一度だけ発火 |
-| `\|self` | `event.target === event.currentTarget` のみ |
-| `\|enter` | Enter キーのみ |
-| `\|escape` | Escape キーのみ |
+| `\|once` | Fire once only / 一度だけ発火 |
+| `\|self` | Only if `target === currentTarget` |
+| `\|enter` | Enter key only |
+| `\|escape` | Escape key only |
 
-### カスタムイベント emit
-
-```chasket
-<script>
-emit close: { reason: string }
-
-fn handleClose() {
-  $emit('close', { reason: 'user-action' })
-}
-</script>
-```
-
-```html
-<!-- 親側で受信 -->
-<my-dialog onclose="handleDialogClose(event)"></my-dialog>
-```
-
-### 双方向バインディング :bind
+### Two-way binding `:bind` / 双方向バインディング
 
 ```chasket
 <script>
-state text: string = ""
+  state text: string = ""
 </script>
-
 <template>
   <input :bind="text" />
-  <p>入力: {{ text }}</p>
+  <p>Input: {{ text }}</p>
 </template>
+```
+
+### ES Module imports (v0.3+) / ES Module インポート
+
+```chasket
+<script>
+  import { createStore } from '../lib/store';
+  const store = createStore();
+  state count: number = 0
+</script>
 ```
 
 ---
 
-## 5. コンポーネントを組み合わせる
+## 5. Component Composition / コンポーネントの合成
+
+Chasket components work as standard HTML tags. No import needed.
 
 Chasket コンポーネントは通常の HTML タグとして使えます。import 不要です。
 
-`src/task-item.csk`:
-
 ```chasket
+<!-- task-item.csk -->
 <meta>
-name: "task-item"
-shadow: open
+  name: "task-item"
+  shadow: open
 </meta>
-
 <script>
-prop label: string = ""
-prop done: boolean = false
-emit toggle: void
+  prop label: string = ""
+  prop done: boolean = false
+  emit toggle: void
 </script>
-
 <template>
   <div :class="done ? 'done' : ''">
     <button @click="$emit('toggle')">
-      <#if condition="done">✓<:else>○</#if>
+      <#if condition="done">done<:else>pending</#if>
     </button>
     <span>{{ label }}</span>
   </div>
 </template>
-
-<style>
-.done span { text-decoration: line-through; color: #999; }
-button { cursor: pointer; border: none; background: none; font-size: 1.2rem; }
-</style>
 ```
 
-`src/task-list.csk`:
+The bundle registers all components before any `connectedCallback` fires, so nesting works regardless of file order.
 
-```chasket
-<meta>
-name: "task-list"
-shadow: open
-</meta>
-
-<script>
-state tasks: string[] = ["Learn Chasket", "Build an app"]
-</script>
-
-<template>
-  <h2>タスク一覧</h2>
-  <#for each="task, i" of="tasks">
-    <task-item :label="task"></task-item>
-  </#for>
-</template>
-```
-
-バンドルが全コンポーネントを登録するので、ファイルの順序を気にする必要はありません。
+バンドルは全コンポーネントを一括登録するため、ファイル順に関わらずネストが正しく動作します。
 
 ---
 
-## 6. エコシステム
-
-Chasket にはフレームワーク級の機能を提供するパッケージがあります:
-
-### chasket-router — SPA ルーティング
+## 6. Production Build / 本番ビルド
 
 ```bash
-# index.html で読み込む
-<script src="chasket-router/index.js"></script>
+npm run build
 ```
 
-```javascript
-import { createRouter } from '@chasket/chasket-router';
+Output:
 
-const router = createRouter({
-  routes: [
-    { path: '/', component: 'page-home' },
-    { path: '/about', component: 'page-about' },
-    { path: '/users/:id', component: 'user-detail' },
-  ]
-});
 ```
-
-テンプレートでルーターコンポーネントを使用:
+dist/
+├── chasket-bundle.js       # All components bundled / 全コンポーネントバンドル
+├── lib/                    # Transpiled TypeScript / トランスパイル済み TS
+└── components/             # Individual files / 個別ファイル
+```
 
 ```html
-<chasket-router>
-  <chasket-route></chasket-route>
-</chasket-router>
-<chasket-link to="/about">About</chasket-link>
+<!DOCTYPE html>
+<html>
+<head><title>My App</title></head>
+<body>
+  <my-app></my-app>
+  <script type="module" src="dist/chasket-bundle.js"></script>
+</body>
+</html>
 ```
-
-### chasket-store — 状態管理
-
-```javascript
-import { createStore } from '@chasket/chasket-store';
-
-const store = createStore({
-  state: { count: 0 },
-  actions: {
-    increment(state) { return { count: state.count + 1 } }
-  },
-  getters: {
-    doubled(state) { return state.count * 2 }
-  }
-});
-```
-
-undo/redo、ミドルウェア、セレクター購読にも対応しています。
-
-### chasket-ui — UIコンポーネントライブラリ
-
-`<fl-button>`, `<fl-input>`, `<fl-dialog>`, `<fl-tabs>` など 9 種類のアクセシブルなコンポーネントが利用可能です。
-
-```html
-<fl-button variant="primary" size="md">送信</fl-button>
-<fl-dialog open heading="確認">本当に削除しますか？</fl-dialog>
-<fl-tabs>
-  <fl-tab-panel label="タブ1">内容1</fl-tab-panel>
-  <fl-tab-panel label="タブ2">内容2</fl-tab-panel>
-</fl-tabs>
-```
-
-### vite-plugin-chasket — Vite 統合
-
-```javascript
-// vite.config.js
-import chasketPlugin from '@chasket/vite-plugin-chasket';
-
-export default {
-  plugins: [chasketPlugin({ src: 'src' })]
-};
-```
-
-Vite の HMR と組み合わせてシームレスな開発体験を実現します。
 
 ---
 
-## 7. エディタサポート
+## 7. Editor Support / エディタサポート
 
 ### VS Code
 
-```bash
-cp -r chasket-vscode ~/.vscode/extensions/chasket-lang-0.1.0
-```
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=chasket.chasket-lang) or search "Chasket" in Extensions.
 
-提供される機能: シンタックスハイライト、リアルタイムエラー検出、自動補完、ホバードキュメント、定義ジャンプ、アウトライン、ファイルアイコン。
+VS Code の拡張機能パネルで「Chasket」を検索するか、[Marketplace](https://marketplace.visualstudio.com/items?itemName=chasket.chasket-lang) からインストール。
 
-### Neovim / Sublime Text / Emacs / Helix
-
-Chasket は LSP (Language Server Protocol) サーバーを提供しています。LSP 対応エディタならどれでも使えます:
+### Neovim / Sublime / Emacs / Helix
 
 ```bash
 npx chasket-lsp --stdio
 ```
 
-各エディタの設定方法は [LSP API ドキュメント](api/chasket-lsp.md) を参照してください。
+See [LSP API docs](api/chasket-lsp.md) for editor-specific setup.
 
 ---
 
-## 8. Vite で使う
-
-Vite プロジェクトと組み合わせる場合:
+## 8. Type Checking / 型チェック
 
 ```bash
-npm create vite@latest my-vite-app -- --template vanilla
-cd my-vite-app
+npx @chasket/chasket check
 ```
 
-`vite.config.js`:
+Detects: undefined variables, type mismatches, undeclared prop usage, invalid template references.
 
-```javascript
-import { defineConfig } from 'vite';
-import chasketPlugin from '../vite-plugin-chasket';
+検出対象: 未定義変数、型不一致、未宣言 prop、テンプレート内の無効な参照。
 
-export default defineConfig({
-  plugins: [chasketPlugin({ src: 'src' })]
-});
-```
-
-これで `.csk` ファイルを通常のモジュールとして import できます:
-
-```javascript
-import './components/my-counter.csk';
-```
+Supported types: `string`, `number`, `boolean`, `void`, `any`, `string[]`, `number[]`, `Array<T>`, `Map<K,V>`, `Set<T>`, `Record<K,V>`, `HTMLElement` and subtypes.
 
 ---
 
-## 9. 型チェック
+## Troubleshooting / トラブルシューティング
 
-Chasket コンパイラには組み込みの型チェッカーがあります:
-
-```bash
-node chasket-cli/bin/chasket.js check
-```
-
-検出される問題:
-
-- 未定義変数の参照
-- 型の不一致（number に string を代入など）
-- 未宣言の prop 属性の使用
-- テンプレート内の無効な変数参照
+**Event handlers cannot use string literals** — Use named functions instead of inline expressions:
 
 ```chasket
-<script>
-state count: number = 0
-</script>
-
-<template>
-  <!-- ⚠ "cont" は未定義 → コンパイルエラー -->
-  <p>{{ cont }}</p>
-</template>
-```
-
-### 対応する型
-
-`string`, `number`, `boolean`, `void`, `any`, `string[]`, `number[]`, `Array<T>`, `Map<K,V>`, `Set<T>`, `Record<K,V>`, `HTMLElement` およびその派生型
-
----
-
-## 10. デバッグのヒント
-
-### エラーバウンダリ
-
-コンポーネントに `on error` ハンドラを追加すると、ランタイムエラーをキャッチしてフォールバック UI を表示できます:
-
-```chasket
-<script>
-state data: any = null
-
-fn async loadData() {
-  const res = await fetch('/api/data')
-  data = await res.json()
-}
-
-on mount {
-  loadData()
-}
-
-on error {
-  console.error("Component error:", error)
-}
-</script>
-```
-
-### 開発サーバーの HMR
-
-`chasket dev` はファイル変更を検知して、変更されたコンポーネントだけをブラウザに送信します。状態は可能な限り保持されます。
-
-HMR を無効にしたい場合:
-
-```bash
-node chasket-cli/bin/chasket.js dev --no-hmr
-```
-
----
-
-## 11. サーバーサイドレンダリング (SSR)
-
-Chasket コンポーネントをサーバー上で HTML に変換し、初期表示を高速化できます。
-
-```javascript
-const { renderToString, renderPage } = require('@chasket/chasket-ssr');
-const fs = require('fs');
-
-// .csk ファイルをサーバーサイドでレンダリング
-const source = fs.readFileSync('src/app.csk', 'utf8');
-const body = renderToString(source, { hydrate: true });
-
-// 完全な HTML ページ生成
-const html = renderPage({
-  title: 'My Chasket App',
-  body,
-  bundlePath: '/dist/chasket-bundle.js',
-  hydrate: true,
-});
-```
-
-### Express との統合
-
-```javascript
-const express = require('express');
-const app = express();
-
-app.use(express.static('dist'));
-app.get('/', (req, res) => res.send(html));
-app.listen(3000);
-```
-
-ハイドレーション機能により、サーバーで生成された HTML をクライアント側で活性化（インタラクティブに）できます。詳しくは [SSR API ドキュメント](api/chasket-ssr.md) を参照してください。
-
----
-
-## 次のステップ
-
-- [API リファレンス](API.md) — Chasket 言語構文の完全なリファレンス
-- [SSR API](api/chasket-ssr.md) — サーバーサイドレンダリングの詳細
-- [LSP API](api/chasket-lsp.md) — エディタ統合の設定方法
-- [技術学習ガイド](LEARNING_GUIDE.md) — コンパイラの内部構造を学ぶ
-- [ロードマップ](ROADMAP.md) — 今後の開発計画
-- [Todo アプリ例](../examples/todo-app/) — 実用的なサンプルアプリ
-
----
-
-## トラブルシューティング
-
-### イベントハンドラで文字列が使えない
-
-Chasket のテンプレートでは、イベントハンドラに文字列リテラルやインライン関数は書けません。代わりに名前付き関数を使ってください:
-
-```chasket
-<!-- ✗ これはエラー -->
+<!-- Bad -->
 <button @click="setFilter('all')">All</button>
 
-<!-- ✓ 名前付き関数を使う -->
+<!-- Good -->
 <script>
-fn setFilterAll() {
-  filter = "all"
-}
+  fn setFilterAll() { filter = "all" }
 </script>
 <template>
   <button @click="setFilterAll">All</button>
 </template>
 ```
 
-### Shadow DOM 内で外部 CSS が効かない
+**External CSS has no effect inside Shadow DOM** — Components with `shadow: open` isolate styles. Define styles in the component's `<style>` block.
 
-`shadow: open` のコンポーネントは Shadow DOM 内にスタイルが閉じています。外部のグローバル CSS は影響しません。コンポーネント内の `<style>` ブロックでスタイルを定義してください。
+**Component not rendering** — Check: (1) `<meta>` `name` contains a hyphen, (2) HTML tag matches `name`, (3) `dist/chasket-bundle.js` is loaded.
 
-### コンポーネントが表示されない
+---
 
-1. `<meta>` の `name` がハイフンを含む有効なカスタム要素名になっているか確認
-2. HTML 内のタグ名と `name` が一致しているか確認
-3. `dist/chasket-bundle.js` がロードされているか確認（ブラウザのコンソールを確認）
+## Next Steps / 次のステップ
+
+- [API Reference / API リファレンス](API.md)
+- [ES Module & TypeScript Guide](module-and-typescript.md)
+- [SSR Guide / SSR ガイド](api/chasket-ssr.md)
+- [LSP Guide / LSP ガイド](api/chasket-lsp.md)
+- [Learning Guide / 技術学習ガイド](LEARNING_GUIDE.md)
+- [Roadmap / ロードマップ](ROADMAP.md)

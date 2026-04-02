@@ -152,11 +152,12 @@ git merge main
 
 ### スコープ
 
-全パッケージは `@aspect` スコープで公開する。
+全パッケージは `@chasket` スコープで公開する。
 
 | パッケージ | npm 名 |
 |---|---|
 | chasket-cli | `@chasket/chasket` |
+| create-chasket | `create-chasket` |
 | chasket-ssr | `@chasket/chasket-ssr` |
 | chasket-router | `@chasket/chasket-router` |
 | chasket-store | `@chasket/chasket-store` |

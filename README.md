@@ -1,6 +1,6 @@
-# Chasket 🔥
+# Chasket
 
-**[Documentation & Guide](https://chasket.dev)**
+**[Documentation & Guide](https://chasket.dev)** | [日本語](README.ja.md)
 
 A template-first language that compiles to native Web Components.
 
@@ -38,36 +38,46 @@ Write `.csk` files with a simple, declarative syntax — get zero-runtime Custom
 - **Built-in reactivity** — `state` changes automatically update the DOM.
 - **Scoped CSS** — Shadow DOM isolates styles by default.
 - **Type-checked** — Catches undefined variables, type mismatches, and typos at compile time.
+- **ES Module & TypeScript support** — Import from `.ts` / `.js` files. TypeScript is auto-transpiled.
 - **XSS-safe** — All `{{ }}` interpolation is auto-escaped. Opt in to raw HTML with `{{{ }}}` (with compiler warning) or `@html`.
 
-## Quick start
+## Quick Start
 
 ```bash
-# 1. Clone and enter the repository
-git clone <repo-url> && cd chasket
+# Create a new project (interactive setup)
+npm create chasket
 
-# 2. Create a new project
-node chasket-cli/bin/chasket.js init my-app
+# Or with a project name
+npm create chasket my-app
+```
+
+The interactive setup lets you choose a template (minimal counter, todo app, or SPA) and generates a ready-to-run project. Supports English and Japanese.
+
+```bash
 cd my-app
-
-# 3. Build
-node ../chasket-cli/bin/chasket.js build
-
-# 4. Start dev server (live reload)
-node ../chasket-cli/bin/chasket.js dev
-# → Open http://localhost:3000
+npm install
+npm run dev
+# Open http://localhost:3000
 ```
 
-Or from an existing project with `chasket.config.json`:
+You can also use `npx` directly:
 
 ```bash
-node chasket-cli/bin/chasket.js build    # Production build
-node chasket-cli/bin/chasket.js check    # Type check only
+npx @chasket/chasket init my-app
 ```
 
-## Language overview
+### CLI Commands
 
-### Script declarations
+| Command | Description |
+|---------|-------------|
+| `chasket init` | Create a new project (interactive) |
+| `chasket dev` | Dev server with live reload & HMR |
+| `chasket build` | Production build |
+| `chasket check` | Type check only |
+
+## Language Overview
+
+### Script Declarations
 
 ```chasket
 <script>
@@ -89,7 +99,7 @@ node chasket-cli/bin/chasket.js check    # Type check only
 </script>
 ```
 
-### Template syntax
+### Template Syntax
 
 ```chasket
 <template>
@@ -114,7 +124,7 @@ node chasket-cli/bin/chasket.js check    # Type check only
 </template>
 ```
 
-### Event modifiers
+### Event Modifiers
 
 ```chasket
 <form @submit|prevent="handleSubmit">
@@ -122,21 +132,32 @@ node chasket-cli/bin/chasket.js check    # Type check only
 <input @keydown|enter="search">
 ```
 
-### Emit options
+### ES Module Imports (v0.3+)
+
+Components can import from external `.ts` / `.js` files. When imports are present, the compiler outputs ES Module format.
 
 ```chasket
-emit close: { reason: string }              // Default: bubbles + composed
-emit(bubbles) notify: void                  // Bubbles only
-emit(composed) select: { id: number }       // Crosses Shadow DOM only
-emit(local) internal: void                  // Self only
+<script>
+  import { createStore } from '../lib/store';
+
+  const store = createStore();
+  state count: number = 0
+</script>
 ```
 
-## Build output
+TypeScript files in `src/lib/` are automatically transpiled to `dist/lib/`. Load the bundle with `type="module"`:
+
+```html
+<script type="module" src="dist/chasket-bundle.js"></script>
+```
+
+## Build Output
 
 ```
 dist/
-├── chasket-bundle.js        ← All components bundled (use this)
-└── components/            ← Individual files (for standalone use)
+├── chasket-bundle.js        <- All components bundled (use this)
+├── lib/                     <- Transpiled TypeScript files
+└── components/              <- Individual files (for standalone use)
     ├── app.js
     ├── button.js
     └── card.js
@@ -144,11 +165,11 @@ dist/
 
 ```html
 <!-- One script tag loads everything -->
-<script src="dist/chasket-bundle.js"></script>
+<script type="module" src="dist/chasket-bundle.js"></script>
 <x-app></x-app>
 ```
 
-## Component composition
+## Component Composition
 
 Components reference each other by tag name. No import required at runtime.
 
@@ -162,25 +183,23 @@ Components reference each other by tag name. No import required at runtime.
 
 The bundle registers all components before any `connectedCallback` fires, so nesting works regardless of file order.
 
-## Editor support
+## Editor Support
 
 ### VS Code
 
-```bash
-cp -r chasket-vscode ~/.vscode/extensions/chasket-lang-0.1.0
-```
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=chasket.chasket-lang) or search "Chasket" in the Extensions panel.
 
 Features: syntax highlighting, real-time diagnostics, auto-completion, hover docs, Go to Definition, document outline, and file icons.
 
-### Any LSP-compatible editor (Neovim, Sublime, Emacs, Helix)
+### Any LSP-Compatible Editor (Neovim, Sublime, Emacs, Helix)
 
 ```bash
 npx chasket-lsp --stdio
 ```
 
-The LSP server provides completion, hover, definition jump, references, rename, folding, signature help, formatting, code actions, and diagnostics. See [LSP API docs](docs/api/chasket-lsp.md) for editor-specific setup instructions.
+The LSP server provides completion, hover, definition jump, references, rename, folding, signature help, formatting, code actions, and diagnostics. See [LSP API docs](docs/api/chasket-lsp.md) for editor-specific setup.
 
-## Server-side rendering
+## Server-Side Rendering
 
 ```javascript
 const { renderToString, renderPage } = require('@chasket/chasket-ssr');
@@ -191,52 +210,49 @@ const page = renderPage({ title: 'My App', body: html, hydrate: true });
 
 See [SSR API docs](docs/api/chasket-ssr.md) for Express/Fastify integration examples.
 
-## CLI commands
-
-| Command | Description |
-|---------|-------------|
-| `chasket init <name>` | Create new project |
-| `chasket dev` | Dev server with file watching |
-| `chasket build` | Production build |
-| `chasket check` | Type check only |
-
 ## Ecosystem
 
 | Package | Description |
 |---------|-------------|
-| `@chasket/chasket` | Compiler & CLI |
+| [`@chasket/chasket`](https://www.npmjs.com/package/@chasket/chasket) | Compiler & CLI |
+| [`create-chasket`](https://www.npmjs.com/package/create-chasket) | Project scaffolding (`npm create chasket`) |
 | `@chasket/chasket-ssr` | Server-side rendering with hydration support |
 | `@chasket/chasket-lsp` | Language Server Protocol for any editor |
 | `@chasket/chasket-router` | SPA routing with `<chasket-router>`, `<chasket-link>` |
 | `@chasket/chasket-store` | Flux-like state management with undo/redo |
 | `@chasket/chasket-ui` | 9 accessible UI components (`<fl-button>`, `<fl-dialog>`, etc.) |
 | `@chasket/vite-plugin-chasket` | Vite integration with HMR |
-| `chasket-vscode` | VS Code extension (LSP or inline mode) |
+| [`chasket-vscode`](https://marketplace.visualstudio.com/items?itemName=chasket.chasket-lang) | VS Code extension |
 | `chasket-compiler-rust` | Experimental Rust compiler (parser stage) |
 
 ## Documentation
 
-- [Getting Started ガイド](docs/getting-started.md) — 初めての方はこちら
-- [API リファレンス](docs/API.md) — Chasket 言語構文の完全なリファレンス
-- [SSR ガイド](docs/api/chasket-ssr.md) — サーバーサイドレンダリング
-- [LSP ガイド](docs/api/chasket-lsp.md) — エディタ統合・Language Server
+- [Getting Started](docs/getting-started.md) — First steps with Chasket
+- [API Reference](docs/API.md) — Complete language syntax reference
+- [ES Module & TypeScript Guide](docs/module-and-typescript.md) — Import and TypeScript support
+- [SSR Guide](docs/api/chasket-ssr.md) — Server-side rendering
+- [LSP Guide](docs/api/chasket-lsp.md) — Editor integration & Language Server
 - [Router API](docs/api/chasket-router.md) / [Store API](docs/api/chasket-store.md) / [UI API](docs/api/chasket-ui.md)
-- [技術学習ガイド](docs/LEARNING_GUIDE.md) — コンパイラの内部構造
-- [セキュリティポリシー](SECURITY.md) — 脆弱性報告とセキュリティ設計原則
-- [ロードマップ](docs/ROADMAP.md) — 今後の開発計画
+- [Learning Guide](docs/LEARNING_GUIDE.md) — Compiler internals
+- [Security Policy](SECURITY.md) — Vulnerability reporting & security design
+- [Roadmap](docs/ROADMAP.md) — Development plan
+- [Contributing](CONTRIBUTING.md) — Branch strategy, commit conventions, release flow
 
 ## Roadmap
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full development roadmap.
 
-**Current (v0.2.x):** Lightweight, zero-dependency drop-in Web Components — compiler quality, npm publication
-**Next (v0.3.x):** Small-to-medium SPA — keyed list reconciliation, dynamic slots
-**Future (v0.4.x+):** Full-scale SPA — Rust compiler codegen, ESM bundles, DevTools
-- [x] Phase 5: Security audit and fixes (SEC-01 through SEC-06, 5/6 resolved)
-- [x] `{{{ }}}` raw interpolation with W0210 warning
-- [x] `txBody()` recursive scope analysis for watch/fn/lifecycle blocks
-- [x] Enhanced event handler validation (W0211 warnings)
-- [ ] npm package publishing & CI/CD
+**Current (v0.3.x):** Interactive project scaffolding, ES Module/TypeScript imports, i18n CLI, template selection
+**Next (v0.4.x):** Keyed list reconciliation, dynamic slots, small-to-medium SPA features
+**Future (v0.5.x+):** Rust compiler codegen, ESM bundles, DevTools
+
+- [x] ES Module & TypeScript import support
+- [x] Interactive `chasket init` with template selection
+- [x] `npm create chasket` scaffolding
+- [x] CLI i18n (English / Japanese)
+- [x] VS Code extension published on Marketplace
+- [x] Security audit (37 vulnerabilities fixed across 5 rounds)
+- [ ] Keyed diff reconciliation
 - [ ] Rust compiler code generation & WASM output
 - [ ] Playwright E2E tests
 
@@ -247,7 +263,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the full development roadmap.
 - `{{{ }}}` raw interpolation bypasses escaping — compiler emits W0210 warning
 - `@html` is intentionally unescaped — use only with trusted data
 - Event handlers are validated for dangerous patterns (eval, import(), require(), etc.)
-- Each component is wrapped in an IIFE for scope isolation
+- Each component is wrapped in an IIFE for scope isolation (or ES Module when imports are used)
 - CSP nonce-based security, blob: only when HMR is active
 - 37 security vulnerabilities fixed across 5 audit rounds
 - See [SECURITY.md](SECURITY.md) for vulnerability reporting

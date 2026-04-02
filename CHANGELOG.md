@@ -6,13 +6,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [0.3.1] - 2026-04-03
+
+### CLI
+
+- **Interactive `chasket init`**: Arrow-key template selection with 3 built-in templates (minimal counter, todo app, SPA)
+- **`create-chasket` package**: Enables `npm create chasket` / `npm init chasket` for zero-config project scaffolding
+- **i18n support**: CLI messages in English and Japanese (auto-detected from `CHASKET_LANG` or `LANG` environment variable)
+- **Template improvements**: All generated projects use `chasket dev` / `chasket build` in npm scripts (no `npx` needed)
+- **Non-TTY fallback**: Interactive prompts gracefully fall back to number-based input in piped environments
+
+### VS Code Extension (v0.2.2)
+
+- **Export validation fix**: Feature 3 now checks ALL matching files (.d.ts, .ts, .js) instead of stopping at the first match — fixes false warnings when `.d.ts` exists but doesn't contain a named export that `.ts` does
+- **Go-to-definition fix**: Named import jump now correctly finds exports with `declare`, `async`, `abstract class`, `export { name }` patterns
+- **Published to VS Code Marketplace**: Available as `chasket.chasket-lang`
+
+---
+
+## [0.3.0] - 2026-03-31
+
+### Core
+
+- **ES Module output**: When `.csk` files contain `import` statements, the compiler outputs ES Module format instead of IIFE wrapper
+- **TypeScript import support**: Components can `import` from external `.ts` / `.js` files
+- **TypeScript transpilation**: `src/lib/*.ts` files are automatically type-stripped and output to `dist/lib/`
+- **Dev server TS support**: `.ts` files served as `.js` on the fly during development
+
+### CLI
+
+- `chasket build` now transpiles TypeScript files in `src/lib/` to `dist/lib/`
+- `chasket dev` serves `.ts` imports as `.js` with automatic transpilation
+- Bundle output uses `type="module"` when ES Module imports are detected
+
+### VS Code Extension (v0.2.1)
+
+- **Feature 3**: Import path validation — warns on unresolved paths and missing named exports
+- **Go to Definition**: Jump to `.ts` / `.js` source files from `import` statements in `.csk` files
+- Auto-completion for import paths
+
+---
+
 ## [0.2.0] - 2026-03-28
 
 Initial public release. Chasket is a template-first Web Component compiler that compiles `.csk` files into native Web Components with zero dependencies.
 
 ### Core
 
-- **Compiler**: `.csk` → Web Component (JS/TS) compilation pipeline (3,800+ lines)
+- **Compiler**: `.csk` -> Web Component (JS/TS) compilation pipeline (3,800+ lines)
 - **Template syntax**: `{{ }}` interpolation, `{{{ }}}` raw interpolation, `<#if>`/`<#else>`/`<#else-if>`, `<#for>`/`<:empty>`
 - **Directives**: `:bind`, `:class` (array/object/string), `:attr`, `@event` (modifiers), `@html`
 - **Reactivity**: `state`, `prop`, `computed`, `fn`, `watch`, `emit`, `ref`, `provide`/`consume`
