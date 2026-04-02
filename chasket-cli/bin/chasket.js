@@ -39,9 +39,9 @@ const path = require('path');
 const http = require('http');
 const crypto = require('crypto');
 const { compile } = require('../lib/compiler');
-const { msg } = require('../lib/messages');
+const { msg, getLocale } = require('../lib/messages');
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.1';
 const args = process.argv.slice(2);
 const cmd = args[0];
 
@@ -230,38 +230,125 @@ function banner() {
  * @function cmdInit
  * @returns {void}
  */
-function cmdInit() {
-  const name = args[1];
-  if (!name) { console.error(c.err('Usage: chasket init <project-name>')); process.exit(1); }
+async function cmdInit() {
+  const readline = require('readline');
 
-  // P1-26: Validate project name (npm standard: lowercase, numbers, hyphens, underscores, dots)
-  // プロジェクト名がパッケージ名として有効か検証
-  // これにより npm publish 時のエラーを事前に防ぐ
+  // ── 対話プロンプト: テキスト入力 ──
+  function askText(question, defaultVal) {
+    return new Promise((resolve) => {
+      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+      const def = defaultVal ? c.d(` (${defaultVal})`) : '';
+      rl.question(`  ${c.info('?')} ${c.b(question)}${def}${c.info(' › ')}`, (answer) => {
+        rl.close();
+        resolve(answer.trim() || defaultVal || '');
+      });
+    });
+  }
+
+  // ── 対話プロンプト: 矢印キー選択（非TTY時は番号入力にフォールバック） ──
+  function askSelect(question, options) {
+    // 非TTY環境（パイプ、CI等）は番号入力にフォールバック
+    if (!process.stdin.isTTY) {
+      return new Promise((resolve) => {
+        console.log(`  ${c.info('?')} ${c.b(question)}`);
+        for (let i = 0; i < options.length; i++) {
+          console.log(`    ${c.info(i + 1 + ')')} ${options[i].label}  ${c.d(options[i].desc)}`);
+        }
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        rl.question(`  ${c.info('› ')}`, (answer) => {
+          rl.close();
+          const idx = parseInt(answer, 10) - 1;
+          resolve(options[idx >= 0 && idx < options.length ? idx : 0].value);
+        });
+      });
+    }
+
+    return new Promise((resolve) => {
+      let selected = 0;
+
+      function render(first) {
+        if (!first) {
+          process.stdout.write(`\x1B[${options.length + 1}A\x1B[0J`);
+        }
+        console.log(`  ${c.info('?')} ${c.b(question)}`);
+        for (let i = 0; i < options.length; i++) {
+          const arrow = i === selected ? c.info('❯') : ' ';
+          const label = i === selected ? c.b(options[i].label) : options[i].label;
+          console.log(`    ${arrow} ${label}  ${c.d(options[i].desc)}`);
+        }
+      }
+
+      render(true);
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+
+      function handler(key) {
+        if (key === '\x1B[A' || key === 'k') {
+          selected = (selected - 1 + options.length) % options.length;
+          render(false);
+        } else if (key === '\x1B[B' || key === 'j') {
+          selected = (selected + 1) % options.length;
+          render(false);
+        } else if (key === '\r' || key === '\n') {
+          process.stdin.setRawMode(false);
+          process.stdin.removeListener('data', handler);
+          process.stdin.pause();
+          // 選択結果を表示
+          process.stdout.write(`\x1B[${options.length + 1}A\x1B[0J`);
+          console.log(`  ${c.ok('✓')} ${c.b(question)} ${c.info(options[selected].label)}`);
+          resolve(options[selected].value);
+        } else if (key === '\x03') {
+          process.stdin.setRawMode(false);
+          console.log('\n');
+          process.exit(0);
+        }
+      }
+      process.stdin.on('data', handler);
+    });
+  }
+
+  // ── 対話開始 ──
+  console.log(`\n  ${c.info('▸')} ${c.b('Chasket')} — ${msg('CLI_INIT_HEADING')}\n`);
+
+  // 1. プロジェクト名（引数があればスキップ）
+  let name = args[1];
+  if (!name) {
+    name = await askText(msg('CLI_INIT_ASK_NAME'), 'my-chasket-app');
+  }
+
+  // プロジェクト名バリデーション
   if (!/^[a-z0-9][-a-z0-9_.]*$/.test(name)) {
     console.error(c.err(msg('CLI_INIT_INVALID_NAME', {name})));
     process.exit(1);
   }
 
   const dir = path.resolve(name);
-  // 既存ディレクトリの存在確認（既存プロジェクトへの誤上書き防止）
-  if (fs.existsSync(dir)) { console.error(c.err(msg('CLI_INIT_EXISTS', {dir: name}))); process.exit(1); }
+  if (fs.existsSync(dir)) {
+    console.error(c.err(msg('CLI_INIT_EXISTS', {dir: name})));
+    process.exit(1);
+  }
 
-  console.log(`\n  ${c.info('▸')} ${c.b('Creating')} ${name}/\n`);
+  // 2. テンプレート選択
+  const template = await askSelect(msg('CLI_INIT_ASK_TEMPLATE'), [
+    { label: 'minimal',   desc: msg('CLI_INIT_TPL_MINIMAL'), value: 'minimal'  },
+    { label: 'todo-app',  desc: msg('CLI_INIT_TPL_TODO'),    value: 'todo'     },
+    { label: 'spa',       desc: msg('CLI_INIT_TPL_SPA'),     value: 'spa'      },
+  ]);
 
-  // Create directories
-  // プロジェクト構造の基本ディレクトリをすべて作成
-  const dirs = [
-    '',
-    'src',
-    'src/components',
-    'src/lib',
-    'dist',
-  ];
+  console.log();
+
+  // ── ファイル生成 ──
+  console.log(`  ${c.info('▸')} ${c.b(msg('CLI_INIT_CREATING'))} ${name}/\n`);
+
+  // 共通ディレクトリ
+  const dirs = ['', 'src', 'src/components', 'dist'];
+  if (template === 'minimal') dirs.push('src/lib');
   for (const d of dirs) {
     fs.mkdirSync(path.join(dir, d), { recursive: true });
   }
 
-  // chasket.config.json - ビルドとコンパイルの設定ファイル
+  // chasket.config.json
   fs.writeFileSync(path.join(dir, 'chasket.config.json'), JSON.stringify({
     target: 'js',
     outdir: 'dist',
@@ -273,27 +360,41 @@ function cmdInit() {
   }, null, 2) + '\n');
   console.log(`    ${c.ok('✓')} chasket.config.json`);
 
-  // package.json - npm パッケージメタデータと NPM scripts
-  // npx 経由で chasket を実行することで、グローバルインストール不要にする
-  // devDependencies に @chasket/chasket を追加し、npm install 後は npx なしでも動作
+  // package.json
   fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     name: name,
     version: '0.0.1',
     private: true,
     scripts: {
-      dev: 'npx chasket dev',
-      build: 'npx chasket build',
-      check: 'npx chasket check',
+      dev: 'chasket dev',
+      build: 'chasket build',
+      check: 'chasket check',
     },
     devDependencies: {
-      '@chasket/chasket': '^0.2.0',
+      '@chasket/chasket': '^0.3.0',
     },
   }, null, 2) + '\n');
   console.log(`    ${c.ok('✓')} package.json`);
 
-  // Root component: app.csk
-  // サンプルコンポーネント：シンプルなカウンター実装
-  const appChasket = `<meta>
+  // ── テンプレート別ファイル生成 ──
+  if (template === 'minimal') {
+    generateMinimal(dir, name);
+  } else if (template === 'todo') {
+    generateTodo(dir, name);
+  } else if (template === 'spa') {
+    generateSpa(dir, name);
+  }
+
+  console.log(`\n  ${c.ok('✓ ' + msg('CLI_INIT_DONE'))}\n`);
+  console.log(`  ${msg('CLI_INIT_NEXT')}\n`);
+  console.log(`    ${c.b(`cd ${name}`)}`);
+  console.log(`    ${c.b('npm install')}`);
+  console.log(`    ${c.b('npm run dev')}\n`);
+}
+
+// ── テンプレート: minimal ──
+function generateMinimal(dir, name) {
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'app.csk'), `<meta>
   name: "x-app"
   shadow: open
 </meta>
@@ -308,8 +409,8 @@ function cmdInit() {
 
 <template>
   <div class="app">
-    <h1>Chasket へようこそ！</h1>
-    <p>このコンポーネントを編集して開発を始めましょう。</p>
+    <h1>${msg('CLI_INIT_WELCOME')}</h1>
+    <p>${msg('CLI_INIT_EDIT_HINT')}</p>
     <div class="counter">
       <span class="value">{{ count }}</span>
       <button class="btn" @click="increment">+1</button>
@@ -318,88 +419,317 @@ function cmdInit() {
 </template>
 
 <style>
-  .app {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    max-width: 480px;
-    margin: 60px auto;
-    text-align: center;
-    color: #333;
-  }
-  h1 {
-    font-size: 2rem;
-    margin: 0 0 8px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  p {
-    color: #888;
-    margin: 0 0 32px;
-  }
-  .counter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-  }
-  .value {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #667eea;
-    min-width: 80px;
-  }
-  .btn {
-    padding: 12px 32px;
-    border-radius: 8px;
-    border: none;
-    background: #667eea;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
+  .app { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 480px; margin: 60px auto; text-align: center; color: #333; }
+  h1 { font-size: 2rem; margin: 0 0 8px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  p { color: #888; margin: 0 0 32px; }
+  .counter { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .value { font-size: 3rem; font-weight: 700; color: #667eea; min-width: 80px; }
+  .btn { padding: 12px 32px; border-radius: 8px; border: none; background: #667eea; color: white; font-size: 1.2rem; cursor: pointer; transition: background 0.2s, transform 0.1s; }
   .btn:hover { background: #5a6fd6; }
   .btn:active { transform: scale(0.96); }
 </style>
-`;
-  fs.writeFileSync(path.join(dir, 'src', 'components', 'app.csk'), appChasket);
+`);
   console.log(`    ${c.ok('✓')} src/components/app.csk`);
 
-  // index.html - エントリーHTMLファイル
-  // コンパイル済みのバンドル JS を読み込み、ルートコンポーネント <x-app> をマウント
-  const indexHtml = `<!DOCTYPE html>
+  fs.writeFileSync(path.join(dir, 'src', 'index.html'), `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${name}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { min-height: 100vh; background: #fafafa; }
-  </style>
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { min-height: 100vh; background: #fafafa; }</style>
 </head>
 <body>
   <x-app></x-app>
-  <!-- Chasket: 全コンポーネントが1つにバンドルされます -->
   <script type="module" src="dist/chasket-bundle.js"><\/script>
 </body>
 </html>
-`;
-  fs.writeFileSync(path.join(dir, 'src', 'index.html'), indexHtml);
+`);
   console.log(`    ${c.ok('✓')} src/index.html`);
 
-  // utils.ts placeholder - TypeScript ユーティリティ関数のサンプル
-  fs.writeFileSync(path.join(dir, 'src', 'lib', 'utils.ts'), '// ユーティリティ関数をここに記述\nexport function formatDate(d: Date): string {\n  return d.toLocaleDateString("ja-JP");\n}\n');
+  const utilsComment = getLocale() === 'ja' ? '// ユーティリティ関数をここに記述' : '// Add utility functions here';
+  const utilsLocale = getLocale() === 'ja' ? 'ja-JP' : 'en-US';
+  fs.writeFileSync(path.join(dir, 'src', 'lib', 'utils.ts'), `${utilsComment}\nexport function formatDate(d: Date): string {\n  return d.toLocaleDateString("${utilsLocale}");\n}\n`);
   console.log(`    ${c.ok('✓')} src/lib/utils.ts`);
+}
 
-  console.log(`\n  ${c.ok('✓ Done!')}\n`);
-  console.log(`  次のステップ:\n`);
-  console.log(`    ${c.b(`cd ${name}`)}`);
-  console.log(`    ${c.b('npm install')}        # 依存関係をインストール`);
-  console.log(`    ${c.b('npm run dev')}        # 開発サーバーを起動\n`);
-  console.log(`  もしくは直接実行:\n`);
-  console.log(`    ${c.b('npx chasket dev')}    # npx 経由`);
-  console.log(`    ${c.b('node <path>/chasket-cli/bin/chasket.js dev')}  # 直接実行\n`);
+// ── テンプレート: todo-app ──
+function generateTodo(dir, name) {
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'todo-app.csk'), `<meta>
+  name: "todo-app"
+  shadow: open
+</meta>
+
+<script>
+  state items: string[] = []
+  state newText: string = ""
+  state filter: string = "all"
+
+  computed activeCount: number = items.filter(i => !i.startsWith("[x] ")).length
+  computed completedCount: number = items.filter(i => i.startsWith("[x] ")).length
+  computed filteredItems: string[] = items.filter(item => {
+    if (filter === "active") return !item.startsWith("[x] ")
+    if (filter === "done") return item.startsWith("[x] ")
+    return true
+  })
+
+  fn addItem() {
+    if (newText.trim()) {
+      items = [...items, newText.trim()]
+      newText = ""
+    }
+  }
+
+  fn toggleItem(index) {
+    items = items.map((item, i) =>
+      i === index ? (item.startsWith("[x] ") ? item.slice(4) : "[x] " + item) : item
+    )
+  }
+
+  fn removeItem(index) {
+    items = items.filter((_, i) => i !== index)
+  }
+
+  fn clearCompleted() {
+    items = items.filter(i => !i.startsWith("[x] "))
+  }
+
+  fn setFilter(value) {
+    filter = value
+  }
+
+  fn handleInput(e) {
+    newText = e.target.value
+  }
+
+  fn handleKeydown(e) {
+    if (e.key === "Enter") { addItem() }
+  }
+</script>
+
+<template>
+  <div class="todo">
+    <h1>Chasket Todo</h1>
+    <div class="input-row">
+      <input class="input" :value="newText" placeholder="What needs to be done?" @input="handleInput" @keydown="handleKeydown" />
+      <button class="add-btn" @click="addItem">Add</button>
+    </div>
+    <div class="filters">
+      <button :class="['filter', filter === 'all' ? 'active' : '']" @click="setFilter('all')">All</button>
+      <button :class="['filter', filter === 'active' ? 'active' : '']" @click="setFilter('active')">Active</button>
+      <button :class="['filter', filter === 'done' ? 'active' : '']" @click="setFilter('done')">Done</button>
+    </div>
+    <ul class="list">
+      <#for each="item" of="filteredItems">
+        <li :class="['item', item.startsWith('[x] ') ? 'done' : '']">
+          <button class="check" @click="toggleItem(index)">
+            <#if condition="item.startsWith('[x] ')">✓<:else>○</#if>
+          </button>
+          <span class="text"><#if condition="item.startsWith('[x] ')">{{ item.slice(4) }}<:else>{{ item }}</#if></span>
+          <button class="remove" @click="removeItem(index)">×</button>
+        </li>
+      <:empty>
+        <li class="empty">${msg('CLI_INIT_TODO_EMPTY')}</li>
+      </#for>
+    </ul>
+    <div class="footer">
+      <span>{{ activeCount }} item(s) left</span>
+      <#if condition="completedCount > 0">
+        <button class="clear" @click="clearCompleted">Clear ({{ completedCount }})</button>
+      </#if>
+    </div>
+  </div>
+</template>
+
+<style>
+  :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; margin: 40px auto; color: #1a1a2e; }
+  .todo { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 2rem; }
+  h1 { text-align: center; font-size: 2rem; color: #3b82f6; margin: 0 0 1.5rem; }
+  .input-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .input { flex: 1; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+  .input:focus { border-color: #3b82f6; }
+  .add-btn { padding: 0.75rem 1.25rem; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  .add-btn:hover { background: #2563eb; }
+  .filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .filter { flex: 1; padding: 0.5rem; background: #f3f4f6; border: 2px solid transparent; border-radius: 6px; font-size: 0.875rem; cursor: pointer; text-align: center; }
+  .filter.active { border-color: #3b82f6; background: #eff6ff; color: #3b82f6; font-weight: 600; }
+  .list { list-style: none; padding: 0; margin: 0; }
+  .item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6; }
+  .item.done .text { text-decoration: line-through; color: #9ca3af; }
+  .check { width: 2rem; height: 2rem; border: 2px solid #d1d5db; border-radius: 50%; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .item.done .check { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
+  .text { flex: 1; }
+  .remove { border: none; background: none; color: #ef4444; cursor: pointer; font-size: 1.25rem; opacity: 0; }
+  .item:hover .remove { opacity: 1; }
+  .empty { padding: 2rem; text-align: center; color: #9ca3af; font-style: italic; }
+  .footer { display: flex; justify-content: space-between; padding-top: 1rem; font-size: 0.875rem; color: #6b7280; }
+  .clear { background: none; border: none; color: #ef4444; cursor: pointer; text-decoration: underline; }
+</style>
+`);
+  console.log(`    ${c.ok('✓')} src/components/todo-app.csk`);
+
+  fs.writeFileSync(path.join(dir, 'src', 'index.html'), `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${name}</title>
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { min-height: 100vh; background: #fafafa; }</style>
+</head>
+<body>
+  <todo-app></todo-app>
+  <script type="module" src="dist/chasket-bundle.js"><\/script>
+</body>
+</html>
+`);
+  console.log(`    ${c.ok('✓')} src/index.html`);
+}
+
+// ── テンプレート: spa ──
+function generateSpa(dir, name) {
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'app-shell.csk'), `<meta>
+  name: "app-shell"
+  shadow: open
+</meta>
+
+<script>
+  state currentPath: string = ""
+
+  fn updatePath() {
+    currentPath = window.location.hash.replace("#", "") || "/"
+  }
+
+  on mount {
+    updatePath()
+    window.addEventListener("hashchange", () => { updatePath() })
+  }
+</script>
+
+<template>
+  <div class="shell">
+    <nav class="nav">
+      <span class="logo">${name}</span>
+      <div class="links">
+        <a href="#/" :class="currentPath === '/' ? 'active' : ''">Home</a>
+        <a href="#/about" :class="currentPath === '/about' ? 'active' : ''">About</a>
+      </div>
+    </nav>
+    <main class="main">
+      <#if condition="currentPath === '/'">
+        <page-home></page-home>
+      <:else-if condition="currentPath === '/about'">
+        <page-about></page-about>
+      <:else>
+        <page-not-found></page-not-found>
+      </#if>
+    </main>
+  </div>
+</template>
+
+<style>
+  :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .shell { min-height: 100vh; background: #fafafa; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .logo { font-weight: 700; font-size: 1.25rem; color: #f97316; }
+  .links { display: flex; gap: 1.5rem; }
+  .links a { text-decoration: none; color: #6b7280; font-weight: 500; transition: color 0.2s; }
+  .links a:hover, .links a.active { color: #f97316; }
+  .main { padding: 2rem; }
+</style>
+`);
+  console.log(`    ${c.ok('✓')} src/components/app-shell.csk`);
+
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'page-home.csk'), `<meta>
+  name: "page-home"
+  shadow: open
+</meta>
+
+<template>
+  <div class="home">
+    <h1>${name}</h1>
+    <p>${msg('CLI_INIT_SPA_DESC')}</p>
+    <div class="features">
+      <div class="card"><h3>Zero Runtime</h3><p>コンパイル済み Web Components で高速動作</p></div>
+      <div class="card"><h3>SPA Routing</h3><p>ハッシュベースルーティングでページ遷移</p></div>
+      <div class="card"><h3>Reactive State</h3><p>state 宣言で自動 DOM 更新</p></div>
+    </div>
+  </div>
+</template>
+
+<style>
+  :host { display: block; }
+  .home { text-align: center; padding: 2rem; }
+  h1 { font-size: 2.5rem; color: #f97316; margin-bottom: 0.5rem; }
+  p { color: #6b7280; margin-bottom: 2rem; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; max-width: 700px; margin: 0 auto; }
+  .card { padding: 1.5rem; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; }
+  .card h3 { color: #111827; margin: 0 0 0.5rem; }
+  .card p { color: #6b7280; margin: 0; font-size: 0.9rem; }
+</style>
+`);
+  console.log(`    ${c.ok('✓')} src/components/page-home.csk`);
+
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'page-about.csk'), `<meta>
+  name: "page-about"
+  shadow: open
+</meta>
+
+<template>
+  <div class="about">
+    <h1>About</h1>
+    <p>${msg('CLI_INIT_ABOUT_DESC')}</p>
+    <p>${msg('CLI_INIT_ABOUT_DESC2')}</p>
+  </div>
+</template>
+
+<style>
+  :host { display: block; }
+  .about { max-width: 600px; margin: 2rem auto; }
+  h1 { color: #111827; border-bottom: 2px solid #f97316; padding-bottom: 0.5rem; }
+  p { color: #4b5563; line-height: 1.7; margin-top: 1rem; }
+</style>
+`);
+  console.log(`    ${c.ok('✓')} src/components/page-about.csk`);
+
+  fs.writeFileSync(path.join(dir, 'src', 'components', 'page-not-found.csk'), `<meta>
+  name: "page-not-found"
+  shadow: open
+</meta>
+
+<template>
+  <div class="not-found">
+    <h1>404</h1>
+    <p>${msg('CLI_INIT_404')}</p>
+    <a href="#/">${msg('CLI_INIT_404_BACK')}</a>
+  </div>
+</template>
+
+<style>
+  :host { display: block; }
+  .not-found { text-align: center; padding: 4rem 2rem; }
+  h1 { font-size: 4rem; color: #d1d5db; }
+  p { color: #6b7280; margin: 1rem 0; }
+  a { color: #f97316; text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+</style>
+`);
+  console.log(`    ${c.ok('✓')} src/components/page-not-found.csk`);
+
+  fs.writeFileSync(path.join(dir, 'src', 'index.html'), `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${name}</title>
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; }</style>
+</head>
+<body>
+  <app-shell></app-shell>
+  <script type="module" src="dist/chasket-bundle.js"><\/script>
+</body>
+</html>
+`);
+  console.log(`    ${c.ok('✓')} src/index.html`);
 }
 
 // ═══════════════════════════════════════════
@@ -1993,7 +2323,7 @@ function getArg(name) {
  * - --help / -h / (空)    ヘルプ表示
  */
 switch (cmd) {
-  case 'init': cmdInit(); break;
+  case 'init': cmdInit().catch(e => { console.error(c.err(e.message)); process.exit(1); }); break;
   case 'build': cmdBuild(); break;
   case 'dev': cmdDev(); break;
   case 'check': cmdCheck(); break;
@@ -2023,7 +2353,7 @@ function printHelp() {
 ${c.b('Chasket')} v${VERSION} - Web Component コンパイラ
 
 ${c.b('Usage:')}
-  chasket init <name>        新規プロジェクト作成
+  chasket init               新規プロジェクト作成（対話型）
   chasket dev                開発サーバー起動 (HMR有効)
   chasket build              本番ビルド
   chasket check              型チェックのみ

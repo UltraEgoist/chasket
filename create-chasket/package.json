@@ -1,0 +1,29 @@
+{
+  "name": "create-chasket",
+  "version": "0.3.1",
+  "description": "Create a new Chasket project with interactive setup",
+  "bin": {
+    "create-chasket": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "chasket",
+    "web-components",
+    "create",
+    "scaffold",
+    "init",
+    "template"
+  ],
+  "author": "Aspect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UltraEgoist/chasket.git",
+    "directory": "create-chasket"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

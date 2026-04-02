@@ -169,6 +169,91 @@ const MESSAGES = {
     ja: 'Usage: chasket init <project-name>'
   },
 
+  CLI_INIT_HEADING: {
+    en: 'Create a project',
+    ja: 'プロジェクト作成'
+  },
+
+  CLI_INIT_ASK_NAME: {
+    en: 'Project name',
+    ja: 'プロジェクト名'
+  },
+
+  CLI_INIT_ASK_TEMPLATE: {
+    en: 'Template',
+    ja: 'テンプレート'
+  },
+
+  CLI_INIT_TPL_MINIMAL: {
+    en: '— Minimal counter app',
+    ja: '— 最小構成のカウンターアプリ'
+  },
+
+  CLI_INIT_TPL_TODO: {
+    en: '— Todo app (state management sample)',
+    ja: '— ToDoアプリ（状態管理のサンプル）'
+  },
+
+  CLI_INIT_TPL_SPA: {
+    en: '— SPA (multi-page with router)',
+    ja: '— SPA（ルーター付き複数ページ）'
+  },
+
+  CLI_INIT_CREATING: {
+    en: 'Creating',
+    ja: '作成中'
+  },
+
+  CLI_INIT_DONE: {
+    en: 'Done!',
+    ja: '完了！'
+  },
+
+  CLI_INIT_NEXT: {
+    en: 'Next steps:',
+    ja: '次のステップ:'
+  },
+
+  CLI_INIT_WELCOME: {
+    en: 'Welcome to Chasket!',
+    ja: 'Chasket へようこそ！'
+  },
+
+  CLI_INIT_EDIT_HINT: {
+    en: 'Edit this component to start developing.',
+    ja: 'このコンポーネントを編集して開発を始めましょう。'
+  },
+
+  CLI_INIT_TODO_EMPTY: {
+    en: 'Add a task to get started',
+    ja: 'タスクを追加してください'
+  },
+
+  CLI_INIT_SPA_DESC: {
+    en: 'A SPA demo built with Chasket. Use the links above to navigate.',
+    ja: 'Chasket で構築された SPA のデモです。上のリンクでページを切り替えてみましょう。'
+  },
+
+  CLI_INIT_ABOUT_DESC: {
+    en: 'Chasket is a template-first Web Component compiler.',
+    ja: 'Chasket はテンプレートファーストの Web Component コンパイラです。'
+  },
+
+  CLI_INIT_ABOUT_DESC2: {
+    en: 'Write components in .csk files and compile them to native Custom Elements.',
+    ja: '.csk ファイルにコンポーネントを記述し、ネイティブな Custom Elements にコンパイルします。'
+  },
+
+  CLI_INIT_404: {
+    en: 'Page not found',
+    ja: 'ページが見つかりません'
+  },
+
+  CLI_INIT_404_BACK: {
+    en: 'Back to home',
+    ja: 'ホームへ戻る'
+  },
+
   CLI_BUILD_NO_SRC: {
     en: 'Source directory not found: {path}',
     ja: 'ソースディレクトリが見つかりません: {path}'
