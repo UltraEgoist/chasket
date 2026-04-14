@@ -13,10 +13,3 @@ type TemplateBlock = {
     content: string,
     startLine: number
 }
-
-
-declare global {
-    
-    /** テンプレートブロック */
-    type Block = TemplateBlock;
-}
