@@ -31,6 +31,7 @@
 
 const { msg } = require('./messages');
 const { splitBlocks } = require('./splitBlocks');
+const { errorHandler } = require('./error/splitError');
 const __chasketVersion = require('../package.json').version;
 
 
@@ -3303,16 +3304,14 @@ function generate(c, options) {
  */
 function compile(source, fileName, options) {
   // Phase 1: Split blocks
-  const blocks = splitBlocks(source);
-  if (!blocks.some(b => b.type === 'template'))
-    return {
-      success:false,
-      diagnostics:[{
-        level:'error',
-        code:'E0001',
-        message:msg('E0001')
-      }]
-    };
+  const block = 
+    splitBlocks(source).mapError(error => errorHandler(error));
+  if(!block.isSuccess()) {
+    return block;
+  }
+
+  // #TODO: Resultによる実装が完了したら削除予定
+  const blocks = block.fold((block => block), (block => []));
 
   // Phase 2: Parse
   let meta={}, script=[], template=[], style='';

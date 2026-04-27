@@ -3,8 +3,10 @@
 // ============================================================
 
 
+const { Result } = require('./common/result');
+const { splitError } = require('./error/splitError');
 
-//  * @returns {Array<{type: string, content: string, startLine: number}>} Extracted blocks
+
 /**
  * Phase 1: Split source file into semantic blocks.
  *
@@ -12,7 +14,7 @@
  * Normalizes line breaks and tracks line numbers for diagnostics.
  *
  * @param {string} source - Raw .csk file content
- * @returns {TemplateBlock[]} Extracted blocks
+ * @returns {Result<TemplateBlock[], SplitError>} Extracted blocks
  * @description
  * この関数は .csk ファイルをセマンティックブロックに分割します。
  * 各ブロックには開始行番号が記録され、エラー診断に使用されます。
@@ -26,6 +28,7 @@ function splitBlocks(source) {
   // Using [\s\S]*? for non-greedy any-character matching (including newlines)
   const re = /<(meta|script|template|style)(\s[^>]*)?>([\s\S]*?)<\/\1>/g;
   let m;
+  // パースで配列が生成されなくなるまで処理し続ける
   while ((m = re.exec(source)) !== null) {
     blocks.push({
       type: m[1],         // Block type: 'meta', 'script', 'template', or 'style'
@@ -33,7 +36,19 @@ function splitBlocks(source) {
       startLine: source.substring(0, m.index).split('\n').length,  // 1-indexed line number
     });
   }
-  return blocks;
+
+  // templateは必須なので、templateがない場合は
+  if (blocks.filter(block => block.type === 'template').length === 0) {
+    return Result.Err(splitError.NoTemplate());
+  }
+
+  // templateは1つだけ許可される
+  if (blocks.filter(block => block.type === 'template').length > 1) {
+    return Result.Err(splitError.MultipleTemplates(blocks.length, positions));
+  }
+
+  // 成功時にtemplateブロックを返す
+  return Result.Ok(blocks);
 }
 
 // ============================================================

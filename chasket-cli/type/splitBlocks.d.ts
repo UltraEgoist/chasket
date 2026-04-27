@@ -13,3 +13,14 @@ type TemplateBlock = {
     content: string,
     startLine: number
 }
+
+
+/**
+ * 分割エラー
+ */
+type SplitError = {
+  phase: 'split',
+  kind: 'no-template' | 'multiple-templates',
+  count?: number,
+  positions?: number[],
+};
